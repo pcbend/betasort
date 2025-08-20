@@ -1,0 +1,12 @@
+*.root
+*.swp
+*.cuts
+*.sh
+*.c
+*.tof
+.gint_history
+cal/
+bin/
+build/
+histOutput
+
