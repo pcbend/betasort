@@ -105,11 +105,15 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TPID>& implants) const {
   if(fdsi.fEventType==4) { //implant
 
 
-    Histogramer::fill("PID",500 ,-180,-130,fdsi.fPID.tof,
+    Histogramer::fill("PID",500 ,-180,-130,fdsi.GetTOF(),
         1500,1000,2500,fdsi.fPID.de2);
 
     Histogramer::fill("tof_time",720,0,7200,fdsi.fClock.initial/1e9,
+        500,-180,-130,fdsi.GetTOF());   
+
+    Histogramer::fill("tof_time_uncorrected",720,0,7200,fdsi.fClock.initial/1e9,
         500,-180,-130,fdsi.fPID.tof);   
+
 
     Histogramer::fill("de2_time",720,0,7200,fdsi.fClock.initial/1e9,
         500,-180,-130,fdsi.fPID.de2);   

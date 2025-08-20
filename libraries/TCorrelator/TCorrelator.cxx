@@ -90,7 +90,7 @@ void TCorrelator::Correlate() {
       fImplanted[xPos][yPos].dyecal = fdsi.fLowGain1.dyecal;
       fImplanted[xPos][yPos].de1  = fdsi.fPID.de1;  
       fImplanted[xPos][yPos].de2  = fdsi.fPID.de2;  
-      fImplanted[xPos][yPos].tof  = fdsi.fPID.tof;  
+      fImplanted[xPos][yPos].tof  = fdsi.GetTOF();//fdsi.fPID.tof;  
       fImplanted[xPos][yPos].xpos = fdsi.fPID.xpos; 
       fImplanted[xPos][yPos].ypos = fdsi.fPID.ypos; 
 
