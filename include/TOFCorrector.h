@@ -18,14 +18,21 @@ class TH2;
 class TOFCorrector : public TObject {
   public:
     TOFCorrector();
+    TOFCorrector(std::string fname);
     ~TOFCorrector();
 
+    void Copy(TOFCorrector &other) const;
+
+    void FitTOF(TH2 *tof_time=0); 
     void MakeCorrectionFile(std::string fname="",TH2 *tof_time=0); // 
 
     void Draw() const;
 
     double Correct(double tof,double time,int peak=0) const;
 
+    TH2 *CorrectedTOF() const;
+
+    TSpline3* GetSpline() const { return fSplines.size()>0 ? fSplines.at(0) : 0; }
 
   private:
     int fNPeaks;
