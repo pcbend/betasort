@@ -186,8 +186,10 @@ void Unpacker::Unpack() {
           break;
         case 30:   /// MSX40 Logic
           break;
-
         case 31:   /// DB3 SCINT LEFT
+          break;
+        case 32 ... 207: // vandle.
+
           break;
         case 208:  // DYNODE (handled above)
         case 209:  

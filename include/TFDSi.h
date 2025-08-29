@@ -8,6 +8,7 @@
 #include <TPIN.h>
 #include <TPID.h>
 #include <TClover.h>
+#include <TVandle.h>
 
 #include <TOFCorrector.h>
 
@@ -58,6 +59,7 @@ class TFDSi : public TObject{
     TPIN gSCLT;
 
     TClover fClover;
+    TVandle fVandle;
 
     static TOFCorrector *fTOFCorrector;
 
