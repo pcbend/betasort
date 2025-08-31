@@ -11,6 +11,9 @@
 #include <TFDSi.h>
 #include <TPID.h>
 
+#include <chrono>
+#include <thread>
+
 TTreeOut* TTreeOut::fTreeOut = 0;  
 std::mutex TTreeOut::fTreeOutMutex;
 
@@ -61,6 +64,10 @@ void TTreeOut::TreeLoop() {
       break;
     std::pair<TFDSi,std::vector<TPID> > temp = TCorrelator::Get()->pop();
 
+    if(temp.first.fEventType<0) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      continue;
+    }
     //std::sort(implants->begin(),implants->end(),sortTime);
     std::sort(temp.second.begin(),temp.second.end(),sortTime);
 
@@ -128,9 +135,6 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TPID>& implants) const {
     double dxpos = (fdsi.fLowGain1.xpos);
     double dypos = (fdsi.fLowGain1.ypos);
 
-
-
-
     Histogramer::fill("decayX",2000,0,48,fdsi.fLowGain1.xpos,4000,0,64000,fdsi.fLowGain1.dyenergy);
     Histogramer::fill("decayY",2000,0,48,fdsi.fLowGain1.ypos,4000,0,64000,fdsi.fLowGain1.dyenergy);
 
@@ -141,6 +145,42 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TPID>& implants) const {
 
       Histogramer::fill("gsummary",8000,0,4000,hit.fEcal,
           70,0,70,hit.fId);
+    }
+
+    for(int y=0;y<fdsi.fVandle.fHits.size();y++) {
+      TVandleHit hit = fdsi.fVandle.fHits.at(y);
+      Histogramer::fill("vsummaryRight",4000,0,4000,hit.fEnergyRight,
+                                       200,0,200,hit.fId);
+      Histogramer::fill("vsummaryLeft",4000,0,4000,hit.fEnergyLeft,
+                                       200,0,200,hit.fId);
+      Histogramer::fill("vTDiff",400,-2000,2000,hit.fTimeLeft - hit.fTimeRight,
+                                       200,0,200,hit.fId);
+      Histogramer::fill("vTOF",400,-2000,2000,fdsi.fLowGain1.dytime - hit.fTimeRight,
+                               4000,0,4000,hit.fEnergyLeft + hit.fEnergyRight);
+      
+      Histogramer::fill("vTOFR",400,-2000,2000,hit.fTimeRight - fdsi.fLowGain1.dytime,
+                               4000,0,4000,hit.GetQDC());
+      Histogramer::fill("vTOFL",400,-2000,2000,hit.fTimeLeft - fdsi.fLowGain1.dytime,
+                               4000,0,4000,hit.GetQDC());
+
+      double dt = fdsi.fLowGain1.dytime - hit.fTimeRight;
+/*
+      for(size_t z=0;z<hit.fTrace.size();z++) {
+        Histogramer::fill("vTrace",150,0,150,z,
+                                   4000,0,0,hit.fTrace.at(z));
+        if(dt<20 && dt>-20)
+          Histogramer::fill("vTrace_g",150,0,150,z,
+                                     4000,0,0,hit.fTrace.at(z));
+        if(dt<-50)
+          Histogramer::fill("vTrace_n",150,0,150,z,
+                                     4000,0,0,hit.fTrace.at(z));
+        if(dt>50)
+          Histogramer::fill("vTrace_bg",150,0,150,z,
+                                     4000,0,0,hit.fTrace.at(z));
+
+
+      }
+*/      
     }
 
     TIter iter(Histogramer::Get()->GetBlobs());

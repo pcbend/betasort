@@ -59,6 +59,7 @@ void TFDSi::Copy(TFDSi &other) const {
   gSCLT.Copy(other.gSCLT);
 
   fClover.Copy(other.fClover);
+  fVandle.Copy(other.fVandle);
 
   other.fEventType = fEventType;
   other.fHitMap    = fHitMap;
@@ -94,6 +95,7 @@ void TFDSi::Reset() {
   gSCLT.Reset();
 
   fClover.Reset();
+  fVandle.Reset();
 
   fEventType = -1;
   fHitMap.clear();

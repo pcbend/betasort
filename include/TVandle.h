@@ -21,15 +21,24 @@ class TVandleHit : public TObject {
 
     void Copy(TVandleHit &other) const;
     void Reset();
+    void Print(Option_t *opt="") const;
 
   //private:
+
     int    fId;
-    double fTime;
-    double fCfdTime;
-    double fEnergy;
+    double fTimeRight;
+    double fTimeLeft;
+    double fEnergyRight;
+    double fEnergyLeft;
     double fEcal;
 
-  ClassDef(TVandleHit,4)
+    std::vector<unsigned short> fTraceRight;
+    std::vector<unsigned short> fTraceLeft;
+
+    void DrawTrace(); 
+    double GetQDC() const;
+
+  ClassDef(TVandleHit,6)
 };
 
 
@@ -41,7 +50,8 @@ class TVandle : public TObject {
     //static void ReadCalFile(std::string name);
     void Copy(TVandle &other) const;
     void Reset();
-    void Unpack(ddasHit &chanhit, int det);
+    void Print(Option_t *opt="") const;
+    void Unpack(ddasHit &chanhit, int det=-1);
     //void AddBack();
 
 //  private:

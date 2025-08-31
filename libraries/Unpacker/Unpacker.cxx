@@ -189,7 +189,7 @@ void Unpacker::Unpack() {
         case 31:   /// DB3 SCINT LEFT
           break;
         case 32 ... 207: // vandle.
-
+          fdsi.fVandle.Unpack(hit);
           break;
         case 208:  // DYNODE (handled above)
         case 209:  
