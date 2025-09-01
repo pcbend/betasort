@@ -4,6 +4,8 @@
 *.sh
 *.c
 *.tof
+.DS_Store
+*.trace
 .gint_history
 cal/
 bin/
