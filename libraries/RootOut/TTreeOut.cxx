@@ -155,12 +155,12 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TPID>& implants) const {
                                        200,0,200,hit.fId);
       Histogramer::fill("vTDiff",400,-2000,2000,hit.fTimeLeft - hit.fTimeRight,
                                        200,0,200,hit.fId);
-      Histogramer::fill("vTOF",400,-2000,2000,fdsi.fLowGain1.dytime - hit.fTimeRight,
+      Histogramer::fill("vTOF",400,0,3200,hit.fTimeRight - fdsi.fLowGain1.dytime,
                                4000,0,4000,hit.fEnergyLeft + hit.fEnergyRight);
       
-      Histogramer::fill("vTOFR",400,-2000,2000,hit.fTimeRight - fdsi.fLowGain1.dytime,
+      Histogramer::fill("vTOFR",400,0,3200,hit.fTimeRight - fdsi.fLowGain1.dytime,
                                4000,0,4000,hit.GetQDC());
-      Histogramer::fill("vTOFL",400,-2000,2000,hit.fTimeLeft - fdsi.fLowGain1.dytime,
+      Histogramer::fill("vTOFL",400,0,3200,hit.fTimeLeft - fdsi.fLowGain1.dytime,
                                4000,0,4000,hit.GetQDC());
 
       double dt = fdsi.fLowGain1.dytime - hit.fTimeRight;
