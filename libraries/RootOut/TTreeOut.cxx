@@ -63,6 +63,7 @@ void TTreeOut::TreeLoop() {
     if(!TCorrelator::Get()->LoopRunning() &&  TCorrelator::Get()->qsize()==0) 
       break;
     std::pair<TFDSi,std::vector<TPID> > temp = TCorrelator::Get()->pop();
+    fIn++;
 
     if(temp.first.fEventType<0) {
       std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -74,14 +75,16 @@ void TTreeOut::TreeLoop() {
     MakeHistograms(temp.first,temp.second);
 
     if(!fNoTree) {
+      std::lock_guard<std::mutex> lock(fTreeOutMutex);
       TFDSi tempFDSi = temp.first;
       tempFDSi.Copy(*fdsi);  //copies into fdsi
 
       *implants = temp.second;
 
       tree->Fill();
+      fFillCounter++;
     }
-    fFillCounter++;
+    fOut++;
   }
 
 
@@ -93,8 +96,9 @@ void TTreeOut::TreeLoop() {
   fLoopRunning = false;
 }
 
-std::string TTreeOut::Status() const {
-  std::string s = Form("TTree filled %lu",fFillCounter);
+std::string TTreeOut::Status() {
+  std::lock_guard<std::mutex> lock(fTreeOutMutex);
+  std::string s = Form("TreeOut: in[%lu]  out[%lu]  filled[%lu]",fIn,fOut,fFillCounter);
   return s;
 }
 

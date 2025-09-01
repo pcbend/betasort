@@ -16,6 +16,9 @@ class Unpacker {
   private:
     std::queue<TFDSi> fQueue;
     bool fLoopRunning;
+    
+    long fIn;
+    long fOut;
 
   public:
     bool LoopRunning() const { return fLoopRunning; }
@@ -27,7 +30,7 @@ class Unpacker {
 
     void Unpack();  // unpacking loop
 
-    std::string Status() const;
+    std::string Status();
 
 };
 

@@ -16,6 +16,9 @@ class TTreeOut {
     TTreeOut();
     static TTreeOut *fTreeOut;  
     static std::mutex fTreeOutMutex;
+    long fIn;
+    long fOut;
+
 
   public:
     TTreeOut(const TTreeOut&) = delete;
@@ -26,7 +29,7 @@ class TTreeOut {
     static void SetNoTree() { fNoTree = true; }
 
     void TreeLoop(); // output tree loop
-    std::string Status() const;
+    std::string Status();
 
     bool LoopRunning()  const { return fLoopRunning; }
 

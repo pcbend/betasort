@@ -33,7 +33,7 @@ class TAnalyzer : public TObject {
 
     bool Next(std::vector<ddasHit> &hits);
     void Progress(int mod,bool newline=false);
-    std::string Status() const;
+    std::string Status();
 
     void Loop();
     bool LoopRunning() const { return fLoopRunning; }
@@ -69,12 +69,16 @@ class TAnalyzer : public TObject {
     std::mutex fQueueMutex; 
     bool fLoopRunning;
 
+    long fIn;
+    long fOut; 
+
   public:
     std::queue<std::vector<ddasHit> > GetQ() { return fQueue; }
     size_t qsize() const { return fQueue.size(); }
 
     void push(std::vector<ddasHit> &hits);
     std::vector<ddasHit> pop(); 
+
 
   ClassDef(TAnalyzer,0)
 };

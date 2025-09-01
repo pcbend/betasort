@@ -55,6 +55,9 @@ TAnalyzer::TAnalyzer() {
   traceLength = 0;
   trace       = 0;
   
+  fIn  = 0;
+  fOut = 0;
+
   //disable automatic directory association
   //TH1::AddDirectory(false);
 
@@ -146,8 +149,11 @@ void TAnalyzer::Progress(int mod,bool newline) {
   fflush(stdout);
 }
 
-std::string TAnalyzer::Status() const { 
-  std::string s = Form("TAnalyzer:  on entry  %lu / %lu q[%lu]",current,entries,qsize());
+std::string TAnalyzer::Status() { 
+  std::lock_guard<std::mutex> lock(fQueueMutex);
+  std::string s = Form("TAnalyzer:  on entry  %lu / %lu \t in[%lu] : out[%lu] q[%lu]",current,entries,fIn,fOut,qsize());
+  fIn=0;
+  fOut=0;
   return  s;
 }
 
@@ -168,6 +174,7 @@ void TAnalyzer::Loop() {
 void TAnalyzer::push(std::vector<ddasHit> &hits) {
   std::lock_guard<std::mutex> lock(fQueueMutex);
   fQueue.push(hits); 
+  fIn++;
   return;
 }
     
@@ -176,6 +183,7 @@ std::vector<ddasHit> TAnalyzer::pop() {
   if(fQueue.size()!=0) {
     std::vector<ddasHit> hits = fQueue.front();
     fQueue.pop();
+    fOut++;
     return hits;
   }
   std::vector<ddasHit> hits;

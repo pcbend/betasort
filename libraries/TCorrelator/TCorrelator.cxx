@@ -13,7 +13,7 @@
 TCorrelator *TCorrelator::fCorrelator = 0;
 std::mutex TCorrelator::fCorrelatorMutex;
 
-TCorrelator::TCorrelator() { Reset(); } 
+TCorrelator::TCorrelator() :fIn(0), fOut(0) { Reset(); } 
 
 TCorrelator::~TCorrelator() { } 
 
@@ -169,8 +169,9 @@ void TCorrelator::Correlate() {
 }
 
 
-std::string TCorrelator::Status() const {
-  std::string s = Form("TCorrelator qsize:    %lu",qsize());
+std::string TCorrelator::Status()  {
+  std::lock_guard<std::mutex> lock(CorrelatorMtx);
+  std::string s = Form("TCorrelator in[%lu]  out[%lu]  q[%lu]",fIn,fOut,qsize());
   return s;
 }
 

@@ -26,6 +26,8 @@ class TCorrelator {
   private:
     std::queue<std::pair<TFDSi,std::vector<TPID> > > fQueue;
     bool fLoopRunning;
+    long fIn;
+    long fOut;
 
   public:
     bool LoopRunning() const { return fLoopRunning; }
@@ -37,7 +39,7 @@ class TCorrelator {
 
     void Correlate();  // Correlation loop
 
-    std::string Status() const;
+    std::string Status();
 
     void ShowImplantVector(int dx=-1,int dy=-1) const;
 

@@ -20,7 +20,7 @@ Unpacker* Unpacker::Get() {
 
 }
 
-Unpacker::Unpacker() { } 
+Unpacker::Unpacker() : fIn(0), fOut(0) { } 
 
 Unpacker::~Unpacker() { } 
 
@@ -29,6 +29,7 @@ std::mutex UnpackerMtx;
 void Unpacker::push(TFDSi &fdsi) {
   std::lock_guard<std::mutex> lock(UnpackerMtx);
   fQueue.push(fdsi); 
+  fIn++;
   return;
 }
     
@@ -37,6 +38,7 @@ TFDSi Unpacker::pop() {
   if(fQueue.size()!=0) {
     TFDSi fdsi = fQueue.front();
     fQueue.pop();
+    fOut++;
     return fdsi;
   }
   TFDSi fdsi;
@@ -127,7 +129,6 @@ void Unpacker::Unpack() {
 
     Histogramer::fill("DynodeDynode",100,0,100,ndynode,100,0,100,gdynode);
     Histogramer::fill("AnodeAnode",100,0,100,nanode,100,0,100,ganode);
-
 
 
     double previoustime = 0;
@@ -348,7 +349,7 @@ void Unpacker::Unpack() {
           break;
       };
     }
-  
+ 
     // check fdsi, add to queue....
     if(fdsi.fHighGain1.dyhit==1 || fdsi.fHighGain2.dyhit==1) { 
        fdsi.fHighGain1.hit = 1;
@@ -382,8 +383,11 @@ void Unpacker::Unpack() {
 }
 
 
-std::string Unpacker::Status() const {
-  std::string s = Form("Unpacker qsize:    %lu",qsize());
+std::string Unpacker::Status() {
+  std::lock_guard<std::mutex> lock(UnpackerMtx);
+  std::string s = Form("Unpacker:  in[%lu]  out[%lu]  q[%lu]",fIn, fOut, qsize());
+  fIn = 0;
+  fOut =0;
   return s;
 }
 
