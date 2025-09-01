@@ -102,6 +102,9 @@ std::string TTreeOut::Status() {
   return s;
 }
 
+TCutG *neutron = 0;
+
+
 void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TPID>& implants) const { 
 
   if(!Histogramer::Get()->GetBlobs()) {
@@ -109,7 +112,10 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TPID>& implants) const {
     Histogramer::Get()->SetBlobGates(Form("%s/gates/myPid_de2.cuts",getenv("BSYS")));
   }
 
-
+  if(!neutron) {
+    TFile *f = TFile::Open("gates/neutron.cuts");
+    neutron = (TCutG*)f->Get("neutron");
+  }
 
   Histogramer::fill("runtime",3600,0,3600000,fdsi.fClock.initial/1e6);
 
@@ -151,6 +157,8 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TPID>& implants) const {
           70,0,70,hit.fId);
     }
 
+    int nmult =0;
+
     for(int y=0;y<fdsi.fVandle.fHits.size();y++) {
       TVandleHit hit = fdsi.fVandle.fHits.at(y);
       Histogramer::fill("vsummaryRight",4000,0,4000,hit.fEnergyRight,
@@ -167,8 +175,12 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TPID>& implants) const {
       Histogramer::fill("vTOFL",400,0,3200,hit.fTimeLeft - fdsi.fLowGain1.dytime,
                                4000,0,4000,hit.GetQDC());
 
-      double dt = fdsi.fLowGain1.dytime - hit.fTimeRight;
+
+      if(neutron && neutron->IsInside(hit.fTimeLeft - fdsi.fLowGain1.dytime,hit.GetQDC())) {
+        nmult++;
+      }
 /*
+      double dt = fdsi.fLowGain1.dytime - hit.fTimeRight;
       for(size_t z=0;z<hit.fTrace.size();z++) {
         Histogramer::fill("vTrace",150,0,150,z,
                                    4000,0,0,hit.fTrace.at(z));
@@ -181,11 +193,11 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TPID>& implants) const {
         if(dt>50)
           Histogramer::fill("vTrace_bg",150,0,150,z,
                                      4000,0,0,hit.fTrace.at(z));
-
-
       }
 */      
     }
+
+    Histogramer::fill("nmult",100,0,100,nmult);
 
     TIter iter(Histogramer::Get()->GetBlobs());
     while(TCutG* blob = (TCutG*)iter.Next()) {
@@ -202,6 +214,16 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TPID>& implants) const {
                 70,0,70,hit.fId);
             Histogramer::fill(blob->GetName(),"dtime",2000,-1000,1000,dtime,
                                                               4000,0,4000,hit.fEcal);
+            if(nmult==1) 
+              Histogramer::fill(blob->GetName(),"dtime1N",2000,-1000,1000,dtime,
+                                                              4000,0,4000,hit.fEcal);
+            if(nmult==2) 
+              Histogramer::fill(blob->GetName(),"dtime2N",2000,-1000,1000,dtime,
+                                                              4000,0,4000,hit.fEcal);
+            if(nmult>0) 
+              Histogramer::fill(blob->GetName(),"dtimeAN",2000,-1000,1000,dtime,
+                                                              4000,0,4000,hit.fEcal);
+
             if(first) 
                Histogramer::fill(blob->GetName(),"dtime_0",2000,-1000,1000,dtime,
                                                                  4000,0,4000,hit.fEcal);
