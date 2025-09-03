@@ -205,6 +205,7 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TPID>& implants) const {
         bool first = true;
         if(blob->IsInside(implants.at(z).tof,implants.at(z).de2)) { 
           double dtime = (fdsi.fClock.initial/1.e6) - implants.at(z).time;
+          Histogramer::fill(blob->GetName(),"dtimeOnly",2000,-1000,1000,dtime);
           for(int y=0;y<fdsi.fClover.hits.size();y++) {
             TCloverHit hit = fdsi.fClover.hits.at(y);
             Histogramer::fill(blob->GetName(),"gtime",500,-2000,2000,fdsi.fLowGain1.dytime - hit.fTime,
