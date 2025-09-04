@@ -226,8 +226,8 @@ void TPSPMT::FitAnodePosition()
   if(xpos == ERR_BADPOS || 
      ypos == ERR_BADPOS ) { 
       bad++;
-      printf(RED "BAD POSITION!!\t %i / %i  %.2f \n" RESET_COLOR,bad,calls,(float(bad)/(float)calls)); 
-      fflush(stdout);
+      //printf(RED "BAD POSITION!!\t %i / %i  %.2f \n" RESET_COLOR,bad,calls,(float(bad)/(float)calls)); 
+      //fflush(stdout);
   }
 
 }

@@ -29,7 +29,7 @@ void TAnalyzer::AddFile(TFile *file) {
 }
 
 void TAnalyzer::AddFile(std::string file) { 
-  printf("adding file %s to chain.\n\n\n\n",file.c_str());
+  //printf("adding file %s to chain.\n\n\n\n",file.c_str());
   Get()->GetChain()->Add(file.c_str());
 }
 

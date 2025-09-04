@@ -170,9 +170,7 @@ void BetaInt::LoadOptions(int argc, char **argv) {
     //we are going to sort, lets read some calibrations in.
     TClover::ReadCalFile("cals/CloverInit_1343.txt");
 
-    printf("here 1\n");
     for(auto file : fFilesToSort) { //bad things will currently happen if ever more then one file, tanalyzer is a singleton.
-    printf("here 2\n");
       TAnalyzer::AddFile(file);
     }
 
