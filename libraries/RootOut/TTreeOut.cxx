@@ -155,6 +155,8 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TPID>& implants) const {
 
       Histogramer::fill("gsummary",8000,0,4000,hit.fEcal,
           70,0,70,hit.fId);
+      Histogramer::fill("gsummary_raw",20000,0,20000,hit.fEcal,
+          70,0,70,hit.fId);
     }
 
     int nmult =0;
