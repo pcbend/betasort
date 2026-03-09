@@ -120,7 +120,8 @@ void TCorrelator::Correlate() {
             for(auto & ion : fImplantVector[xPos+i][yPos+j]) { //empty??
               double dtime = current_time - ion.time; 
 
-              if(abs(dtime) > 1000) {
+              //if(abs(dtime) > 1000) {
+              if(!(dtime>-1000 && dtime<5000)) {  
                 //                printf(BLUE); printf("\t abs(%.1f - %.1f) = %.1f\n",current_time,ion.time, current_time-ion.time); printf(RESET_COLOR); 
                 fImplantVector[xPos+i][yPos+j].erase(fImplantVector[xPos+i][yPos+j].begin()+it);
                 implantsErased++;
