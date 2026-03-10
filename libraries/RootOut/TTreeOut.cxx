@@ -208,6 +208,8 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TImplant>& implants) const
         if(blob->IsInside(implants.at(z).tof,implants.at(z).de2)) { 
           double dtime = (fdsi.fClock.initial/1.e6) - implants.at(z).mtime();
           Histogramer::fill(blob->GetName(),"dtimeOnly",2000,-1000,1000,dtime);
+          Histogramer::fill(blob->GetName(),"dtimefom",6000,-1000,5000,dtime,
+                                                             1000,0,0,implants.at(z).fom);
           for(int y=0;y<fdsi.fClover.hits.size();y++) {
             TCloverHit hit = fdsi.fClover.hits.at(y);
             Histogramer::fill(blob->GetName(),"gtime",500,-2000,2000,fdsi.fLowGain1.dytime - hit.fTime,
@@ -215,20 +217,20 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TImplant>& implants) const
 
             Histogramer::fill(blob->GetName(),"gsummary",8000,0,4000,hit.fEcal,
                 70,0,70,hit.fId);
-            Histogramer::fill(blob->GetName(),"dtime",2000,-1000,1000,dtime,
+            Histogramer::fill(blob->GetName(),"dtime",6000,-1000,5000,dtime,
                                                               4000,0,4000,hit.fEcal);
             if(nmult==1) 
-              Histogramer::fill(blob->GetName(),"dtime1N",2000,-1000,1000,dtime,
+              Histogramer::fill(blob->GetName(),"dtime1N",6000,-1000,5000,dtime,
                                                               4000,0,4000,hit.fEcal);
             if(nmult==2) 
-              Histogramer::fill(blob->GetName(),"dtime2N",2000,-1000,1000,dtime,
+              Histogramer::fill(blob->GetName(),"dtime2N",6000,-1000,5000,dtime,
                                                               4000,0,4000,hit.fEcal);
             if(nmult>0) 
-              Histogramer::fill(blob->GetName(),"dtimeAN",2000,-1000,1000,dtime,
+              Histogramer::fill(blob->GetName(),"dtimeAN",6000,-1000,5000,dtime,
                                                               4000,0,4000,hit.fEcal);
 
             if(first) 
-               Histogramer::fill(blob->GetName(),"dtime_0",2000,-1000,1000,dtime,
+               Histogramer::fill(blob->GetName(),"dtime_0",6000,-1000,5000,dtime,
                                                                  4000,0,4000,hit.fEcal);
 
           }
