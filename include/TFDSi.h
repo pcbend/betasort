@@ -12,7 +12,7 @@
 
 #include <TOFCorrector.h>
 
-class TFDSi : public TObject{
+class TFDSi {
   public:
     TFDSi();
     ~TFDSi();

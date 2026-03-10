@@ -39,13 +39,13 @@ TTreeOut *TTreeOut::Get() {
   return fTreeOut;
 }
 
-bool sortTime(TPID one, TPID two){return one.time > two.time;}
+bool sortTime(TImplant one, TImplant two){return one.timestamp > two.timestamp;}
 
 void TTreeOut::TreeLoop() {
   fLoopRunning = true;
 
   TFDSi *fdsi = 0;
-  std::vector<TPID> *implants =0;
+  std::vector<TImplant> *implants =0;
 
   TDirectory *current = gDirectory;
   TFile *outfile = 0;
@@ -62,7 +62,7 @@ void TTreeOut::TreeLoop() {
   while(true) { 
     if(!TCorrelator::Get()->LoopRunning() &&  TCorrelator::Get()->qsize()==0) 
       break;
-    std::pair<TFDSi,std::vector<TPID> > temp = TCorrelator::Get()->pop();
+    std::pair<TFDSi,std::vector<TImplant> > temp = TCorrelator::Get()->pop();
     fIn++;
 
     if(temp.first.fEventType<0) {
@@ -105,7 +105,7 @@ std::string TTreeOut::Status() {
 TCutG *neutron = 0;
 
 
-void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TPID>& implants) const { 
+void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TImplant>& implants) const { 
 
   if(!Histogramer::Get()->GetBlobs()) {
     printf("CUTS:   %s\n\n\n\n\n\n",Form("%s/gates/myPid_de2.cuts",getenv("BSYS")));
@@ -206,7 +206,7 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TPID>& implants) const {
       for(int z=0;z<int(implants.size());z++) {
         bool first = true;
         if(blob->IsInside(implants.at(z).tof,implants.at(z).de2)) { 
-          double dtime = (fdsi.fClock.initial/1.e6) - implants.at(z).time;
+          double dtime = (fdsi.fClock.initial/1.e6) - implants.at(z).mtime();
           Histogramer::fill(blob->GetName(),"dtimeOnly",2000,-1000,1000,dtime);
           for(int y=0;y<fdsi.fClover.hits.size();y++) {
             TCloverHit hit = fdsi.fClover.hits.at(y);

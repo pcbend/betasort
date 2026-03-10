@@ -7,6 +7,7 @@
 
 class TFDSi;
 class TPID;
+class TImplant;
 
 class TList;
 
@@ -36,7 +37,7 @@ class TTreeOut {
     static void SetRun(int run,int subrun);
 
 
-    void MakeHistograms(TFDSi&,std::vector<TPID>&) const;
+    void MakeHistograms(TFDSi&,std::vector<TImplant>&) const;
 
   private:
     bool fLoopRunning;

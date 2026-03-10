@@ -4,7 +4,9 @@
 
 #pragma link C++ class TPIN+;
 #pragma link C++ class TPID+;
+#pragma link C++ class TImplant+;
 #pragma link C++ class std::vector<TPID>+;
+#pragma link C++ class std::vector<TImplant>+;
 #pragma link C++ class TPSPMT+;
 
 #pragma link C++ class TClock+;

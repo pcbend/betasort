@@ -372,8 +372,7 @@ void Unpacker::Unpack() {
     fdsi.fPID.tof =  fdsi.gSIPMT.Time() - fdsi.gSCLT.Time();
     fdsi.fPID.xpos = fdsi.fLowGain1.xpos;
     fdsi.fPID.ypos = fdsi.fLowGain1.ypos;
-    fdsi.fPID.time = fdsi.nPin1.Time();
-    fdsi.fPID.hasGoodPosition = fdsi.fPID.goodPosition();
+    fdsi.fPID.timestamp = fdsi.nPin1.Time();
 
     push(fdsi);
   }
