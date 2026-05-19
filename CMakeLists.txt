@@ -12,11 +12,15 @@ project(groot
 #check for various ROOT libraries
 find_package(ROOT REQUIRED COMPONENTS RIO Tree) 
 
+#set the compiler to whatever root was compiled against
+set(CMAKE_CXX_STANDARD ${ROOT_CXX_STANDARD})
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+
 #create the executable, we do it 'first' so the exectuable variable is avail in subdirs
 add_executable(betasort src/betasort.cxx)
 
-#set the compiler to whatever root was compiled against
-target_compile_features(betasort PRIVATE cxx_std_${ROOT_CXX_STANDARD})
 
 #setting include paths: TODO, copy headers from library directories(?)
 target_include_directories(betasort PRIVATE ${CMAKE_SOURCE_DIR}/include ${ROOT_INCLUDE_DIRS}) 
