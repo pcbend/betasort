@@ -7,8 +7,16 @@ target_include_directories(PIPELINE PUBLIC
   ${ROOT_INCLUDE_DIRS}
 )
 
-target_link_libraries(PIPELINE PUBLIC ${ROOT_LIBRARIES})
+target_link_libraries(PIPELINE PUBLIC 
+  ${ROOT_LIBRARIES}
+  TANALYZER
+  TFDSI
+  UNPACKER
+  TCORRELATOR
+  HISTOGRAMER
+  ROOTOUT
+)
 
 #link the compiled libraries above to the final executable.
-target_link_libraries(BETAINT PRIVATE PIPELINE)        
+#target_link_libraries(BETAINT PRIVATE PIPELINE)        
 

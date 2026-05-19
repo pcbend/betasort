@@ -13,8 +13,12 @@ root_generate_dictionary(G__TANALYZER
   LINKDEF Linkdef.h
 )
 
-target_link_libraries(TANALYZER PUBLIC ${ROOT_LIBRARIES} HISTOGRAMER)
+target_link_libraries(TANALYZER PUBLIC 
+  ${ROOT_LIBRARIES} 
+  DDASHIT
+  HISTOGRAMER
+)
 
 #link the compiled libraries above to the final executable.
-target_link_libraries(BETAINT PRIVATE TANALYZER)        
+#target_link_libraries(BETAINT PRIVATE TANALYZER)        
 

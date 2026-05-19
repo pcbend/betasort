@@ -11,5 +11,5 @@ target_include_directories(TCORRELATOR PUBLIC
 target_link_libraries(TCORRELATOR PUBLIC ${ROOT_LIBRARIES} HISTOGRAMER TFDSI UNPACKER)
 
 #link the compiled libraries above to the final executable.
-target_link_libraries(BETAINT PRIVATE TCORRELATOR)        
+#target_link_libraries(BETAINT PRIVATE TCORRELATOR)        
 

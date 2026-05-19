@@ -13,7 +13,7 @@
 #include <Gtypes.h>
 #include <argParser.h>
 
-#include <Pipline.h>
+#include <Pipeline.h>
 #include <BetaOptions.h>
 
 //loops
@@ -85,7 +85,7 @@ void BetaInt::LoadStyle() {
   gROOT->ForceStyle();
 }
 
-void BetaInt::ParseOptions(int argc, char **argv) {
+BetaOptions BetaInt::ParseOptions(int argc, char **argv) {
 
   //TODO check the betarc file for preset options....
   
@@ -121,12 +121,12 @@ void BetaInt::ParseOptions(int argc, char **argv) {
     callExit = true;
   }
   
-  if(doHelp){
+  if(options.doHelp){
     //Version();
     std::cout << parser << std::endl;
     callExit = true;
   }
-  if(doVersion) {
+  if(options.doVersion) {
     //Version();
     printf("version not available.\n");
     callExit = true;
@@ -134,22 +134,22 @@ void BetaInt::ParseOptions(int argc, char **argv) {
 
   if(callExit) exit(0);
 
-  for(auto& file : input_files){
+  for(auto& file : options.inputFiles){
     switch(DetermineFileType(file)){
-      case kFileType::CALIBRATIONi:
-        calFiles.push_back(file);
+      case kFileType::CALIBRATION:
+        options.calFiles.push_back(file);
         break;
       case kFileType::ROOTFILE:
-        rootFiles.push_back(file);
+        options.rootFiles.push_back(file);
         break;
       case kFileType::TOF: 
-        tofFiles.push_back(file);
+        options.tofFiles.push_back(file);
         break;
       case kFileType::MACRO:
-        macroFiles.push_back(file);
+        options.macroFiles.push_back(file);
         break;
       case kFileType::CUTS:
-        cutFiles.push_back(file);
+        options.cutFiles.push_back(file);
         break;
       default:
         printf("\tDiscarding unknown file: %s\n",file.c_str());
@@ -163,7 +163,7 @@ void BetaInt::ParseOptions(int argc, char **argv) {
 
 void BetaInt::LoadOptions(int argc, char **argv) {
 
-  BetaOptions options = PasrseOptions(argc,argv);
+  BetaOptions options = ParseOptions(argc,argv);
   Pipeline   pipeline(options);
 
   for(auto& file : options.rootFiles) {
@@ -171,7 +171,7 @@ void BetaInt::LoadOptions(int argc, char **argv) {
   }
 
   if(!options.noSort) {
-    pipeline.Run(0;
+    pipeline.Run();
   }
 
   if(options.doQuit) {

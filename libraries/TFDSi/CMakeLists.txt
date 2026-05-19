@@ -33,5 +33,5 @@ root_generate_dictionary(G__TFDSI
 target_link_libraries(TFDSI PUBLIC ${ROOT_LIBRARIES} ROOT::Spectrum HISTOGRAMER)
 
 #link the compiled libraries above to the final executable.
-target_link_libraries(BETAINT PRIVATE TANALYZER TFDSI)        
+#target_link_libraries(BETAINT PRIVATE TANALYZER TFDSI)        
 

@@ -16,5 +16,5 @@ root_generate_dictionary(G__DDASHIT
 target_link_libraries(DDASHIT PUBLIC ${ROOT_LIBRARIES})
 
 #link the compiled libraries above to the final executable.
-target_link_libraries(TANALYZER PRIVATE DDASHIT)        
+#target_link_libraries(TANALYZER PRIVATE DDASHIT)        
 
