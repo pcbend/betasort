@@ -9,6 +9,21 @@ project(groot
         HOMEPAGE_URL ""
         LANGUAGES CXX)
 
+#check for various ROOT libraries
+find_package(ROOT REQUIRED COMPONENTS RIO Tree) 
+
+#create the executable, we do it 'first' so the exectuable variable is avail in subdirs
+add_executable(betasort src/betasort.cxx)
+
+#set the compiler to whatever root was compiled against
+target_compile_features(betasort PRIVATE cxx_std_${ROOT_CXX_STANDARD})
+
+#setting include paths: TODO, copy headers from library directories(?)
+target_include_directories(betasort PRIVATE ${CMAKE_SOURCE_DIR}/include ${ROOT_INCLUDE_DIRS}) 
+
+target_link_libraries(betasort PRIVATE ${ROOT_LIBRARIES})
+
+
 if(APPLE) 
   message("Building for Darwin")
   add_compile_definitions(__DARWIN__=TRUE)
@@ -17,30 +32,13 @@ elseif(LINUX)
   add_compile_definitions(__LINUX__=TRUE)
 endif()
 
-set(CMAKE_BUILD_TYPE Debug)
-
-#find the root, set the various cmake variables.
-find_package(ROOT REQUIRED) 
-
-include(CMakePrintHelpers)
-cmake_print_variables(ROOT_CXX_FLAGS)
-cmake_print_variables(ROOT_CXX_STANDARD)
-
-set (CMAKE_CXX_STANDARD ${ROOT_CXX_STANDARD})
+#set(CMAKE_BUILD_TYPE Debug)
 
 #setting output paths in the build directory
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_INSTALL_LIBDIR ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-
-set(CMAKE_CXX_FLAGS ${ROOT_CXX_FLAGS})
-
-#create the executablei, we do it 'first' so the exectuable variable is avail in subdirs
-add_executable(betasort src/betasort.cxx)
-
-#setting include paths: TODO, copy headers from library directories(?)
-include_directories(include ${ROOT_INCLUDE_DIRS}) 
 
 #This tells cmake to continue into these directories.
 add_subdirectory(libraries)

@@ -9,11 +9,7 @@
 //#include<TROOT.h>
 
 void loadEnv() {
-  // Set the GRUTSYS variable based on the executable path.
-  // If GRUTSYS has already been defined, don't overwrite.
   setenv("BSYS", (programPath()+"/..").c_str(), 0);
-
-  //printf("BSYS has been set to: %s\n",getenv("GSYS"));
 
   // Load $BSYS/.betarc
   std::string beta_path = Form("%s/.betarc",getenv("BSYS"));
