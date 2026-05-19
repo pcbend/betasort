@@ -34,6 +34,10 @@ void Pipeline::Run() {
   printf(" i am sorting now...\n");
 
   TClover::ReadCalFile("cals/CloverInit_1343.txt");
+  if(fOptions.tofFiles.size()) 
+    TFDSi::SetTOFCorrector(fOptions.tofFiles.at(0));
+
+
 
   for(auto file : fFilesToSort) { //bad things will currently happen if ever more then one file, tanalyzer is a singleton.
     TAnalyzer::AddFile(file);
