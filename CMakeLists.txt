@@ -17,6 +17,11 @@ set(CMAKE_CXX_STANDARD ${ROOT_CXX_STANDARD})
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+#setting output paths in the build directory
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_INSTALL_LIBDIR ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 
 #create the executable, we do it 'first' so the exectuable variable is avail in subdirs
 add_executable(betasort src/betasort.cxx)
@@ -37,11 +42,6 @@ elseif(LINUX)
 endif()
 
 #set(CMAKE_BUILD_TYPE Debug)
-
-#setting output paths in the build directory
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_INSTALL_LIBDIR ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
 #This tells cmake to continue into these directories.

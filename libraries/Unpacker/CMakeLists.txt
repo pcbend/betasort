@@ -10,6 +10,6 @@ target_include_directories(UNPACKER PUBLIC
 #target_link_libraries(UNPACKER ${ROOT_LIBRARIES})
 
 #link the compiled libraries above to the final executable.
-target_link_libraries(UNPACKER PUBLIC TFDSI TANALYZER)        
+target_link_libraries(UNPACKER PUBLIC TFDSI TANALYZER DDASHIT)        
 
 target_link_libraries(BETAINT PRIVATE UNPACKER)        
