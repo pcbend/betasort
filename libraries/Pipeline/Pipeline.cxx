@@ -27,17 +27,21 @@ Pipeline::Pipeline(BetaOptions options) {
 }
 
 void Pipeline::AddFile(TFile *file)  {
-  fFilesToSort.push_back(file);
+  if(!file) return;
+  TObject *obj = file->Get("tree");                                                                                     
+  if(obj && obj->InheritsFrom("TTree")) {
+    fFilesToSort.push_back(file);
+  }
 }
 
 void Pipeline::Run() {
-  printf(" i am sorting now...\n");
+  if(fFilesToSort.empty()) return;
 
+  /// setup ////
+  //////////////
   TClover::ReadCalFile("cals/CloverInit_1343.txt");
   if(fOptions.tofFiles.size()) 
     TFDSi::SetTOFCorrector(fOptions.tofFiles.at(0));
-
-
 
   for(auto file : fFilesToSort) { //bad things will currently happen if ever more then one file, tanalyzer is a singleton.
     TAnalyzer::AddFile(file);
@@ -49,32 +53,30 @@ void Pipeline::Run() {
   Histogramer::Get()->SetRun(run,subrun);
 
 
-  //if(doLoopBackwards)
-  //  TAnalyzer::Get()->SetBackwards();
+
+
+  /// loops ////
+  //////////////
   std::thread root2DDAS(&TAnalyzer::Loop,TAnalyzer::Get());
-
-
-
-  LoopProgress loopprogress;
-  std::thread progress(&LoopProgress::Show,loopprogress);
-  //progress.detach();
-
-  root2DDAS.detach();
 
   std::this_thread::sleep_for(std::chrono::seconds(1));
 
   std::thread ddas2FDSi(&Unpacker::Unpack,Unpacker::Get());
-  ddas2FDSi.detach();
-
   std::thread FDSi2CorrFDSi(&TCorrelator::Correlate,TCorrelator::Get());
-  FDSi2CorrFDSi.detach();
 
   if(fOptions.noTree)
     TTreeOut::SetNoTree();
+  
   TTreeOut::Get()->SetRun(run,subrun);
   std::thread CorrFDSi2Tree(&TTreeOut::TreeLoop,TTreeOut::Get());
-  CorrFDSi2Tree.detach();
 
+  LoopProgress loopprogress;
+  std::thread progress(&LoopProgress::Show,&loopprogress);
+
+  root2DDAS.join();
+  ddas2FDSi.join();
+  FDSi2CorrFDSi.join();
+  CorrFDSi2Tree.join();
   progress.join();
 
   Histogramer::Get()->Close();

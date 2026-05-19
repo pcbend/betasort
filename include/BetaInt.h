@@ -47,8 +47,6 @@ class BetaInt : public TRint {
     int fRootFilesOpened;
     bool fTabLock;
 
-    std::vector<TFile*> fFilesToSort;
-
 #ifndef __CINT__
     std::thread::id fMainThreadId;
 #endif

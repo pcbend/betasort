@@ -254,10 +254,10 @@ TFile *BetaInt::OpenRootFile(const std::string& filename, Option_t* opt) {
       std::cout << "\tfile " << BLUE << file->GetName() << RESET_COLOR
                 <<  " opened as " << BLUE <<  "_file" << fRootFilesOpened << RESET_COLOR <<  std::endl;
       fRootFilesOpened++;
-      TObject *obj = file->Get("tree"); 
-      if(obj && obj->InheritsFrom("TTree")) {
-        fFilesToSort.push_back(file);
-      }
+      //TObject *obj = file->Get("tree"); 
+      //if(obj && obj->InheritsFrom("TTree")) {
+      //  fFilesToSort.push_back(file);
+      //}
     } else {
       std::cout << "Could not create " << filename << std::endl;
     }
