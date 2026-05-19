@@ -1,4 +1,5 @@
 add_subdirectory(BetaInt)
+add_subdirectory(Pipeline)
 add_subdirectory(TAnalyzer)
 add_subdirectory(TFDSi)
 add_subdirectory(Unpacker)

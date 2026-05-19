@@ -9,6 +9,7 @@
 
 #include <TRint.h>
 
+#include <BetaOptions.h>
 #include <Gtypes.h>
 
 class TFile;
@@ -31,8 +32,16 @@ class BetaInt : public TRint {
     kFileType DetermineFileType(const std::string& filename) const;
     //bool      FileAutoDetect(const std::string& filename);
     TFile*    OpenRootFile(const std::string& filename, Option_t *opt="");
-
     void      LoadStyle();    
+
+  private:
+    BetaOptions ParseOptions(int argc, char **argv);
+
+
+
+
+
+
 
   private:
     int fRootFilesOpened;
@@ -45,15 +54,6 @@ class BetaInt : public TRint {
 #endif
 
   ClassDefOverride(BetaInt,0)
-};
-
-class LoopProgress {
-  public: 
-    LoopProgress();
-    ~LoopProgress();
-  
-    void Show();
-
 };
 
 

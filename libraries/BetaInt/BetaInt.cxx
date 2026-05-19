@@ -13,6 +13,9 @@
 #include <Gtypes.h>
 #include <argParser.h>
 
+#include <Pipline.h>
+#include <BetaOptions.h>
+
 //loops
 #include <TAnalyzer.h>
 #include <Unpacker.h>
@@ -82,79 +85,71 @@ void BetaInt::LoadStyle() {
   gROOT->ForceStyle();
 }
 
+void BetaInt::ParseOptions(int argc, char **argv) {
 
-void BetaInt::LoadOptions(int argc, char **argv) {
-  //check the grutrc file for set preset optrions....
-
+  //TODO check the betarc file for preset options....
+  
   argParser parser;
+  BetaOptions options;
 
-  std::vector<std::string> input_files;
-  bool doHelp,doVersion,noSort,doQuit,doLoopBackwards,noTree;
+  bool callExit = false;
 
-  parser.default_option(&input_files)
+  parser.default_option(&options.inputFiles)
     .description("Input file(s)");
-  parser.option("h help ?",&doHelp)
+  parser.option("h help ?",&options.doHelp)
     .description("Show this help Message")
     .default_value(false);
-  parser.option("v version",&doVersion)
+  parser.option("v version",&options.doVersion)
     .description("Show version")
     .default_value(false);
-  parser.option("t notree",&noTree)
+  parser.option("t notree",&options.noTree)
     .description("no fdsi tree  is made")
     .default_value(false);
-  parser.option("b back",&doLoopBackwards)
-    .description("Loop from largest to smallest entry")
-    .default_value(false);
-  parser.option("n no-sort",&noSort)
+  parser.option("n no-sort",&options.noSort)
     .description("Do not attemp to sort input 'trees'")
     .default_value(false);
-  parser.option("q quit",&doQuit)
+  parser.option("q quit",&options.doQuit)
     .description("quit the program after sorting")
     .default_value(false);
 
 
-  // Do the parsing...
   try{
     parser.parse(argc, argv);
   } catch (ParseError& e){
     std::cerr << "ERROR: " << e.what() << "\n"
               << parser << std::endl;
-    //fShouldExit = true;
+    callExit = true;
   }
-
- 
-
-  // Print help if requested.
+  
   if(doHelp){
     //Version();
     std::cout << parser << std::endl;
-    //fShouldExit = true;
+    callExit = true;
   }
   if(doVersion) {
     //Version();
     printf("version not available.\n");
-    //fShouldExit = true;
+    callExit = true;
   }
 
+  if(callExit) exit(0);
 
   for(auto& file : input_files){
     switch(DetermineFileType(file)){
-      case kFileType::CALIBRATION:
+      case kFileType::CALIBRATIONi:
+        calFiles.push_back(file);
         break;
       case kFileType::ROOTFILE:
-        {
-          TFile *rfile = OpenRootFile(file);
-          //if(rfile && doGui && gHistomatic) 
-          //  gHistomatic->AddRootFile(rfile);
-        }
+        rootFiles.push_back(file);
         break;
-      case kFileType::TOF: {
-          TFDSi::SetTOFCorrector(file); 
-        }
+      case kFileType::TOF: 
+        tofFiles.push_back(file);
         break;
       case kFileType::MACRO:
+        macroFiles.push_back(file);
         break;
       case kFileType::CUTS:
+        cutFiles.push_back(file);
         break;
       default:
         printf("\tDiscarding unknown file: %s\n",file.c_str());
@@ -162,61 +157,27 @@ void BetaInt::LoadOptions(int argc, char **argv) {
     };
   }
 
-  //
-  //  The Loop organization. Ideally, each loop would take a pointer to the previous one....
-  //  - Each loop holds a queue of an object which inherits from a TObject....
-  //
-  if(fFilesToSort.size() && !noSort) {
-    //we are going to sort, lets read some calibrations in.
-    TClover::ReadCalFile("cals/CloverInit_1343.txt");
-
-    for(auto file : fFilesToSort) { //bad things will currently happen if ever more then one file, tanalyzer is a singleton.
-      TAnalyzer::AddFile(file);
-    }
-
-    TFile *file =fFilesToSort[0];
-      int run,subrun;
-      getRunNumber(file->GetName(),run,subrun);
-      Histogramer::Get()->SetRun(run,subrun);
+  return options;
+}
 
 
-      if(doLoopBackwards)
-        TAnalyzer::Get()->SetBackwards();
-      std::thread root2DDAS(&TAnalyzer::Loop,TAnalyzer::Get());
-     
-      
+void BetaInt::LoadOptions(int argc, char **argv) {
 
-      LoopProgress loopprogress;
-      std::thread progress(&LoopProgress::Show,loopprogress);
-      //progress.detach();
-      
-      root2DDAS.detach();
-      
-      std::this_thread::sleep_for(std::chrono::seconds(1));
+  BetaOptions options = PasrseOptions(argc,argv);
+  Pipeline   pipeline(options);
 
-      std::thread ddas2FDSi(&Unpacker::Unpack,Unpacker::Get());
-      ddas2FDSi.detach();
-      
-      std::thread FDSi2CorrFDSi(&TCorrelator::Correlate,TCorrelator::Get());
-      FDSi2CorrFDSi.detach();
-  
-      if(noTree)
-        TTreeOut::SetNoTree();
-      TTreeOut::Get()->SetRun(run,subrun);
-      std::thread CorrFDSi2Tree(&TTreeOut::TreeLoop,TTreeOut::Get());
-      CorrFDSi2Tree.detach();
-      
-      progress.join();
-
-      Histogramer::Get()->Close();
-
-      if(doQuit)
-        this->Terminate(0);
-    
+  for(auto& file : options.rootFiles) {
+    pipeline.AddFile(OpenRootFile(file));
   }
 
+  if(!options.noSort) {
+    pipeline.Run(0;
+  }
 
-}
+  if(options.doQuit) {
+    Terminate(0);
+  }
+};
 
 kFileType BetaInt::DetermineFileType(const std::string& filename) const {
   size_t dot = filename.find_last_of('.');
@@ -338,44 +299,5 @@ long BetaInt::ProcessLine(const char* line, bool sync, int* error) {
     //std::cerr << "Error processing line: " << line << std::endl;
   }
   return retval;
-}
-
-LoopProgress::LoopProgress() { } 
-
-LoopProgress::~LoopProgress() { } 
-
-void LoopProgress::Show() { 
-  printf("\n\n"); //make two cleared lines.
-  while(true) { 
-    printf(CLEAR_LINE);
-    printf(CURSOR_UP); printf(CLEAR_LINE);
-    printf(CURSOR_UP); printf(CLEAR_LINE);
-    printf(CURSOR_UP); printf(CLEAR_LINE);
-    printf(CURSOR_UP); printf(CLEAR_LINE);
-    
-    printf("%s\n",TAnalyzer::Get()->Status().c_str());    //TAnalyzer (reads from file)
-    printf("%s\n",Unpacker::Get()->Status().c_str());     //Unpacker  (ddasHit -> FDSi)  //defines EventType
-    printf("%s\n",TCorrelator::Get()->Status().c_str());  //Correlator(FDSi -> Correlated FDSi) 
-    printf("%s\n",TTreeOut::Get()->Status().c_str());
-
-    std::this_thread::sleep_for(std::chrono::seconds(1)); // delay 1 seconds
-    if(!TAnalyzer::Get()->LoopRunning() && TAnalyzer::Get()->qsize()==0  && 
-       !Unpacker::Get()->LoopRunning() && Unpacker::Get()->qsize()==0    &&
-       !TCorrelator::Get()->LoopRunning() && TCorrelator::Get()->qsize()==0    &&
-       !TTreeOut::Get()->LoopRunning() )
-      break;
-  }
-    printf(CLEAR_LINE);
-    printf(CURSOR_UP); printf(CLEAR_LINE);
-    printf(CURSOR_UP); printf(CLEAR_LINE);
-    printf(CURSOR_UP); printf(CLEAR_LINE);
-    printf(CURSOR_UP); printf(CLEAR_LINE);
-    
-    printf("%s\n",TAnalyzer::Get()->Status().c_str());    //TAnalyzer (reads from file)
-    printf("%s\n",Unpacker::Get()->Status().c_str());     //Unpacker  (ddasHit -> FDSi)  //defines EventType
-    printf("%s\n",TCorrelator::Get()->Status().c_str());  //Correlator(FDSi -> Correlated FDSi) 
-    printf("%s\n",TTreeOut::Get()->Status().c_str());
-    printf("\n");
-  return;
 }
 
