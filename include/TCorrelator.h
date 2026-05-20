@@ -4,6 +4,7 @@
 #include <mutex>
 #include <queue>
 #include <vector>
+#include <atomic>
 
 #include <TFDSi.h>
 #include <TPID.h>
@@ -31,7 +32,7 @@ class TCorrelator {
 
   private:
     std::queue<std::pair<TFDSi,std::vector<TImplant> > > fQueue;
-    bool fLoopRunning;
+    std::atomic<bool> fLoopRunning{false};
     long fIn;
     long fOut;
 

@@ -2,6 +2,7 @@
 #define __UNPACKER_H__
 
 #include <queue>
+#include <atomic>
 
 #include <TFDSi.h>
 
@@ -15,7 +16,7 @@ class Unpacker {
 
   private:
     std::queue<TFDSi> fQueue;
-    bool fLoopRunning;
+    std::atomic<bool> fLoopRunning{false};
     
     long fIn;
     long fOut;

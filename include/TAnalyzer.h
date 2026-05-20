@@ -4,6 +4,7 @@
 #include <vector>
 #include <queue>
 #include <mutex>
+#include <atomic>
 
 #include<TObject.h>
 
@@ -67,7 +68,7 @@ class TAnalyzer : public TObject {
   private:
     std::queue<std::vector<ddasHit> > fQueue;
     std::mutex fQueueMutex; 
-    bool fLoopRunning;
+    std::atomic<bool> fLoopRunning{false};
 
     long fIn;
     long fOut; 

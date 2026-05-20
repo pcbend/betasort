@@ -4,6 +4,7 @@
 #include <mutex>
 #include <string>
 #include <vector>
+#include <atomic>
 
 class TFDSi;
 class TPID;
@@ -40,7 +41,7 @@ class TTreeOut {
     void MakeHistograms(TFDSi&,std::vector<TImplant>&) const;
 
   private:
-    bool fLoopRunning;
+    std::atomic<bool> fLoopRunning;
     long fFillCounter;
 
     static int fRun;

@@ -44,6 +44,7 @@ std::mutex CorrelatorMtx;
 void TCorrelator::push(const TFDSi &fdsi,std::vector<TImplant> &corrImplants) {
   std::lock_guard<std::mutex> lock(CorrelatorMtx);
   fQueue.push(std::make_pair(fdsi, corrImplants)); 
+  fIn++;
   return;
 }
 
@@ -55,6 +56,7 @@ bool TCorrelator::pop(std::pair<TFDSi,std::vector<TImplant> > &item) {
   }
   item = fQueue.front();
   fQueue.pop();
+  fOut++;
   return true;
 }
 
@@ -75,7 +77,7 @@ void TCorrelator::Correlate() {
   int decaysFinalized = 0;
 
   while(true) { 
-    if(Unpacker::Get()->qsize()>0) { //event available to correlate
+    //if(Unpacker::Get()->qsize()>0) { //event available to correlate
       TFDSi fdsi;
       
       if(!Unpacker::Get()->pop(fdsi)) {
@@ -93,7 +95,7 @@ void TCorrelator::Correlate() {
       decaysFinalized += FinalizeDecays(current_time);
       implantsErased  += PruneImplants(current_time);
       continue;
-    }
+    //}
 
     if(!Unpacker::Get()->LoopRunning() &&  //finished upacking - still have decays pending 
        Unpacker::Get()->qsize()==0    &&
