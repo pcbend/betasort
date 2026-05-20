@@ -35,16 +35,22 @@ void Unpacker::push(TFDSi &fdsi) {
   return;
 }
     
-TFDSi Unpacker::pop() {
+bool Unpacker::pop(TFDSi &fdsi) {  
   std::lock_guard<std::mutex> lock(UnpackerMtx);
-  if(fQueue.size()!=0) {
-    TFDSi fdsi = fQueue.front();
-    fQueue.pop();
-    fOut++;
-    return fdsi;
+  if(fQueue.empty()) {
+    //std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    return false;
   }
-  TFDSi fdsi;
-  return fdsi;
+
+  fdsi = fQueue.front();
+  fQueue.pop();
+  fOut++;
+  return true;
+}
+
+size_t Unpacker::qsize() {
+  std::lock_guard<std::mutex> lock(UnpackerMtx);
+  return fQueue.size();
 }
 
 
@@ -397,7 +403,7 @@ void Unpacker::Unpack() {
 
 std::string Unpacker::Status() {
   std::lock_guard<std::mutex> lock(UnpackerMtx);
-  std::string s = Form("Unpacker:  in[%lu]  out[%lu]  q[%lu]",fIn, fOut, qsize());
+  std::string s = Form("Unpacker:  in[%lu]  out[%lu]  q[%lu]",fIn, fOut, fQueue.size());
   fIn = 0;
   fOut =0;
   return s;

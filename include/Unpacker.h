@@ -23,10 +23,11 @@ class Unpacker {
   public:
     bool LoopRunning() const { return fLoopRunning; }
     std::queue<TFDSi> GetQ() { return fQueue; }
-    size_t qsize() const { return fQueue.size(); }
+    size_t qsize(); // const { return fQueue.size(); }
 
     void push(TFDSi &fdsi);
-    TFDSi pop(); 
+    //TFDSi pop(); 
+    bool pop(TFDSi &fdsi);
 
     void Unpack();  // unpacking loop
 

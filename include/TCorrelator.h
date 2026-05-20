@@ -38,10 +38,11 @@ class TCorrelator {
   public:
     bool LoopRunning() const { return fLoopRunning; }
     std::queue<std::pair<TFDSi,std::vector<TImplant> > > GetQ() { return fQueue; }
-    size_t qsize() const { return fQueue.size(); }
+    size_t qsize(); // const { return fQueue.size(); }
 
     void push(const TFDSi &fdsi,std::vector<TImplant> &corrImplants);
-    std::pair<TFDSi,std::vector<TImplant> > pop(); 
+    //std::pair<TFDSi,std::vector<TImplant> > pop(); 
+    bool pop(std::pair<TFDSi,std::vector<TImplant> > &item); 
 
     void Correlate();  // Correlation loop
 

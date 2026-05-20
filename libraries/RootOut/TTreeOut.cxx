@@ -62,7 +62,11 @@ void TTreeOut::TreeLoop() {
   while(true) { 
     if(!TCorrelator::Get()->LoopRunning() &&  TCorrelator::Get()->qsize()==0) 
       break;
-    std::pair<TFDSi,std::vector<TImplant> > temp = TCorrelator::Get()->pop();
+    std::pair<TFDSi,std::vector<TImplant> > temp;
+    if(!TCorrelator::Get()->pop(temp))  {
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      continue;
+    }
     fIn++;
 
     if(temp.first.fEventType<0) {

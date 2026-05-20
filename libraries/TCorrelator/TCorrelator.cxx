@@ -47,17 +47,22 @@ void TCorrelator::push(const TFDSi &fdsi,std::vector<TImplant> &corrImplants) {
   return;
 }
 
-std::pair<TFDSi,std::vector<TImplant> > TCorrelator::pop() {
+
+bool TCorrelator::pop(std::pair<TFDSi,std::vector<TImplant> > &item) { 
   std::lock_guard<std::mutex> lock(CorrelatorMtx);
-  if(fQueue.size()!=0) {
-    //TFDSi fdsi = fQueue.front();
-    std::pair<TFDSi,std::vector<TImplant> >temp = fQueue.front();
-    fQueue.pop();
-    return temp;
+  if(fQueue.empty()) {
+    return false;
   }
-  std::pair<TFDSi,std::vector<TImplant> > temp;
-  return temp;
+  item = fQueue.front();
+  fQueue.pop();
+  return true;
 }
+
+size_t TCorrelator::qsize() {
+  std::lock_guard<std::mutex> lock(CorrelatorMtx);
+  return fQueue.size();
+}
+
 
 
 void TCorrelator::Correlate() {
@@ -71,7 +76,12 @@ void TCorrelator::Correlate() {
 
   while(true) { 
     if(Unpacker::Get()->qsize()>0) { //event available to correlate
-      TFDSi fdsi = Unpacker::Get()->pop();
+      TFDSi fdsi;
+      
+      if(!Unpacker::Get()->pop(fdsi)) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        continue;
+      }
       double current_time = fdsi.fClock.initial/1.e6;
       if(fdsi.fEventType==4) {         // 'good' implant
         StoreImplant(fdsi,current_time);
@@ -234,7 +244,7 @@ int TCorrelator::FlushDecays() {
 
 std::string TCorrelator::Status()  {
   std::lock_guard<std::mutex> lock(CorrelatorMtx);
-  std::string s = Form("TCorrelator in[%lu]  out[%lu]  q[%lu]",fIn,fOut,qsize());
+  std::string s = Form("TCorrelator in[%lu]  out[%lu]  q[%lu]",fIn,fOut,fQueue.size());
   return s;
 }
 

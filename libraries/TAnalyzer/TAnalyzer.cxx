@@ -151,7 +151,7 @@ void TAnalyzer::Progress(int mod,bool newline) {
 
 std::string TAnalyzer::Status() { 
   std::lock_guard<std::mutex> lock(fQueueMutex);
-  std::string s = Form("TAnalyzer:  on entry  %lu / %lu \t in[%lu] : out[%lu] q[%lu]",current,entries,fIn,fOut,qsize());
+  std::string s = Form("TAnalyzer:  on entry  %lu / %lu \t in[%lu] : out[%lu] q[%lu]",current,entries,fIn,fOut,fQueue.size());
   fIn=0;
   fOut=0;
   return  s;
