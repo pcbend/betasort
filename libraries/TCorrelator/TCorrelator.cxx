@@ -76,44 +76,36 @@ void TCorrelator::Correlate() {
   int decaysPushed    = 0;
   int decaysFinalized = 0;
 
-  while(true) { 
-    //if(Unpacker::Get()->qsize()>0) { //event available to correlate
-      TFDSi fdsi;
-      
-      if(!Unpacker::Get()->pop(fdsi)) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        continue;
-      }
-      double current_time = fdsi.fClock.initial/1.e6;
-      if(fdsi.fEventType==4) {         // 'good' implant
-        StoreImplant(fdsi,current_time);
+  while(true) {
+    TFDSi fdsi;
+
+    if(Unpacker::Get()->pop(fdsi)) {
+      double current_time = fdsi.fClock.initial / 1.e6;
+
+      if(fdsi.fEventType == 4) {
+        StoreImplant(fdsi, current_time);
         implantsPushed++;
-      } else if(fdsi.fEventType==12) { // 'good' decays
-        StoreDecay(fdsi,current_time);
+      } else if(fdsi.fEventType == 12) {
+        StoreDecay(fdsi, current_time);
         decaysPushed++;
-      } // end is decay.
+      }
+
       decaysFinalized += FinalizeDecays(current_time);
       implantsErased  += PruneImplants(current_time);
       continue;
-    //}
+    }
 
-    if(!Unpacker::Get()->LoopRunning() &&  //finished upacking - still have decays pending 
-       Unpacker::Get()->qsize()==0    &&
-       !fPendingDecays.empty()) {
+    if(!Unpacker::Get()->LoopRunning() && !fPendingDecays.empty()) {
       decaysFinalized += FlushDecays();
       continue;
     }
 
-    if(!Unpacker::Get()->LoopRunning() &&  //finished. 
-       Unpacker::Get()->qsize()==0    &&
-       fPendingDecays.empty()) {
+    if(!Unpacker::Get()->LoopRunning() && fPendingDecays.empty()) {
       break;
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
   }
-
 
 
   printf("\n\n\n\n");
@@ -133,7 +125,7 @@ void TCorrelator::Correlate() {
 void TCorrelator::StoreImplant(const TFDSi& fdsi, double current_time) { 
   int xPos = int(fdsi.GetX());
   int yPos = int(fdsi.GetY());
-  
+
   double timeDiffIon = 0;
   double lasttime = fImplanted[xPos][yPos].timestamp / 1.e6; // timestamp in ms. 
   if(lasttime> 0) {  // is there already a PID in the implant map?
@@ -142,7 +134,7 @@ void TCorrelator::StoreImplant(const TFDSi& fdsi, double current_time) {
       printf(RED "Ion's out of time order\n" RESET_COLOR);
     }
   } 
-  
+
   fImplanted[xPos][yPos].timestamp = fdsi.fPID.timestamp; // / 1.e6; 
   fImplanted[xPos][yPos].dyecal    = fdsi.fLowGain1.dyecal;
   fImplanted[xPos][yPos].de1       = fdsi.fPID.de1;  
@@ -151,11 +143,11 @@ void TCorrelator::StoreImplant(const TFDSi& fdsi, double current_time) {
   fImplanted[xPos][yPos].xpos      = fdsi.fPID.xpos; 
   fImplanted[xPos][yPos].ypos      = fdsi.fPID.ypos; 
   fImplanted[xPos][yPos].dtLastIon = timeDiffIon;
-  
+
   // copy the local implant map into the vector....
   //fImplantVector[xPos][yPos].push_back(fImplanted[xPos][yPos]);
   fImplantVector[xPos][yPos].emplace_back(fImplanted[xPos][yPos]);
-  
+
   //dummy to get the fdsi implant info into the final tree....
   std::vector<TImplant> empty;
   push(fdsi,empty);
@@ -169,22 +161,22 @@ void TCorrelator::StoreDecay(const TFDSi& fdsi, double t) {
 } 
 
 void TCorrelator::CorrelateOneDecay(const TFDSi &fdsi,double tdecay) {
-  
+
   fCorrelatedImplants.clear();
 
   int xPos = int(fdsi.GetX());
   int yPos = int(fdsi.GetY());
- 
+
   if(xPos<0 || xPos >=npspmt_utk ||
-     yPos<0 || yPos >=npspmt_utk) return;
+      yPos<0 || yPos >=npspmt_utk) return;
 
   const int fSearchRadius = 4;   
 
   for(int ix = std::max(0, xPos - fSearchRadius);
-          ix <= std::min(npspmt_utk-1, xPos + fSearchRadius); ++ix) {
+      ix <= std::min(npspmt_utk-1, xPos + fSearchRadius); ++ix) {
     for(int iy = std::max(0, yPos - fSearchRadius);
-            iy <= std::min(npspmt_utk-1, yPos + fSearchRadius); ++iy) {
-      
+        iy <= std::min(npspmt_utk-1, yPos + fSearchRadius); ++iy) {
+
       const auto& vec = fImplantVector[ix][iy];
       for(const auto&ion : vec) { 
         double dtime = tdecay - ion.mtime();
@@ -210,7 +202,7 @@ int TCorrelator::PruneImplants(double current_time) {
       if(vec.empty()) continue;
 
       auto first_keep = std::find_if(vec.begin(),vec.end(),
-        [tmin_keep] (const TPID &ion) { return ion.mtime() >= tmin_keep;});
+          [tmin_keep] (const TPID &ion) { return ion.mtime() >= tmin_keep;});
       erased += std::distance(vec.begin(),first_keep);
       vec.erase(vec.begin(),first_keep);
     }
