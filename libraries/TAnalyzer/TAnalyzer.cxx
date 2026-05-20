@@ -178,17 +178,20 @@ void TAnalyzer::push(std::vector<ddasHit> &hits) {
   return;
 }
     
-std::vector<ddasHit> TAnalyzer::pop() { 
+//std::vector<ddasHit> TAnalyzer::pop() { 
+bool TAnalyzer::pop(std::vector<ddasHit>& hits) {
   std::lock_guard<std::mutex> lock(fQueueMutex);
-  if(fQueue.size()!=0) {
-    std::vector<ddasHit> hits = fQueue.front();
-    fQueue.pop();
-    fOut++;
-    return hits;
-  }
-  std::vector<ddasHit> hits;
-  return hits;
+  if(fQueue.empty())
+    return false;
+
+  hits = fQueue.front();
+  fQueue.pop();
+  fOut++;
+  return true;
 }
 
-
+size_t TAnalyzer::qsize() { 
+  std::lock_guard<std::mutex> lock(fQueueMutex);
+  return fQueue.size();
+}
 

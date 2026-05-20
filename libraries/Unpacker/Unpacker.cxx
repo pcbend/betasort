@@ -10,6 +10,8 @@
 #include <TFile.h>
 #include <TTree.h>
 
+#include <thread>
+#include <chrono>
 
 Unpacker* Unpacker::fUnpacker = 0;
 
@@ -57,7 +59,12 @@ void Unpacker::Unpack() {
     if(!TAnalyzer::Get()->LoopRunning() && TAnalyzer::Get()->qsize()==0)
       break;
     
-    std::vector<ddasHit> hits = TAnalyzer::Get()->pop();
+    std::vector<ddasHit> hits;
+
+    if(!TAnalyzer::Get()->pop(hits)) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      continue;
+    }
 
     TFDSi fdsi;
     fdsi.Reset();
