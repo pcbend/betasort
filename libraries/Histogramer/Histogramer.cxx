@@ -15,6 +15,7 @@
 
 Histogramer                  *Histogramer::fHistogramer = 0;
 std::map<std::string,TList*> *Histogramer::gHistMap     = 0;
+std::mutex                    Histogramer::fHistMutex;
 
 Histogramer *Histogramer::Get() { 
   if(!fHistogramer)
@@ -53,9 +54,11 @@ int Histogramer::SetBlobGates(std::string cutfile) {
 }
 
 void Histogramer::Close() {
-  if(fHistogramer)
+  std::lock_guard<std::mutex> lock(fHistMutex);
+  if(fHistogramer) {
     delete fHistogramer;
-  fHistogramer = 0;
+    fHistogramer = 0;
+  }
 }
 
 
@@ -121,6 +124,8 @@ void Histogramer::fill(std::string hname,
 void Histogramer::fill(std::string dname,std::string hname,
           int xbins,double xlow, double xhigh, double xval,
           int ybins,double ylow,double yhigh,double yval) {
+  std::lock_guard<std::mutex> lock(fHistMutex); 
+
   if(!gHistMap) 
     gHistMap = new std::map<std::string, TList*>;
   if(!((*gHistMap)[dname])) {

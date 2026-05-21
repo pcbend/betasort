@@ -4,15 +4,19 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <mutex>
 
 #include <TList.h>
+
+
 
 class Histogramer {
   private:
     Histogramer();
     static Histogramer *fHistogramer;
     static std::map<std::string,TList*> *gHistMap;
-  
+    static std::mutex fHistMutex;
+
   public:
     static Histogramer *Get(); 
     ~Histogramer();
