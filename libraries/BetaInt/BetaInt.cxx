@@ -111,6 +111,8 @@ BetaOptions BetaInt::ParseOptions(int argc, char **argv) {
   parser.option("q quit",&options.doQuit)
     .description("quit the program after sorting")
     .default_value(false);
+  parser.option("o output",&options.outputLevel)
+    .default_value(OutputLevel::Tree);
 
 
   try{

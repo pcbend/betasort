@@ -11,6 +11,24 @@ enum class OutputLevel {
   Tree
 };
 
+inline std::istream& operator>>(std::istream& in, OutputLevel &level) {
+  std::string value;
+  in >> value;
+  if(value == "analyzer")
+    level = OutputLevel::Analyzer;
+  else if(value == "unpacker")
+    level = OutputLevel::Unpacker;
+  else if(value == "correlator")
+    level = OutputLevel::Correlator;
+  else if(value == "tree" || value == "full")
+    level = OutputLevel::Tree;
+  else
+    level = OutputLevel::Tree;
+  return in;
+}
+
+
+
 class BetaOptions {
   public:
     bool doHelp    = false;
