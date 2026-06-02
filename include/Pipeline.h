@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include <atomic>
 
 #include <BetaOptions.h>
 
