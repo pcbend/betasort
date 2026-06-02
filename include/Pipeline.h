@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <atomic>
+#include <chrono>
 
 #include <BetaOptions.h>
 
