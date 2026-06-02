@@ -73,10 +73,13 @@ class Pipeline {
 
 class LoopProgress {
   public: 
-    LoopProgress();
+    LoopProgress(OutputLevel level);
     ~LoopProgress();
   
     void Show();
+
+  private:
+    OutputLevel fOutputLevel;
   
 };
 

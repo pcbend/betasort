@@ -115,23 +115,25 @@ void Pipeline::Run() {
     CorrFDSi2Tree = std::thread(&TTreeOut::TreeLoop,TTreeOut::Get());
   }
 
-  //LoopProgress loopprogress;
-  //std::thread progress(&LoopProgress::Show,&loopprogress);
+  LoopProgress loopprogress(fOptions.outputLevel);
+  std::thread progress(&LoopProgress::Show,&loopprogress);
 
   if(root2DDAS.joinable())     root2DDAS.join();
   if(ddas2FDSi.joinable())     ddas2FDSi.join();
   if(FDSi2CorrFDSi.joinable()) FDSi2CorrFDSi.join();
   if(CorrFDSi2Tree.joinable()) CorrFDSi2Tree.join();
-  //progress.join();
+  progress.join();
 
   Histogramer::Get()->Close();
-  //fStats.Print();
+  fStats.Print();
 }
 
-LoopProgress::LoopProgress() { }  
+LoopProgress::LoopProgress(OutputLevel level) : fOutputLevel(level) { }  
  
 LoopProgress::~LoopProgress() { }  
  
+
+/* 
 void LoopProgress::Show() {  
   printf("\n\n"); //make two cleared lines. 
   while(true) {  
@@ -166,7 +168,59 @@ void LoopProgress::Show() {
     printf("\n"); 
   return; 
 } 
+*/
 
+
+void LoopProgress::Show() {
+  printf("\n\n");
+
+  auto done = [this]() {
+    bool analyzerDone =
+      !TAnalyzer::Get()->LoopRunning();
+
+    bool unpackerDone =
+      fOutputLevel == OutputLevel::Analyzer ||
+      (!Unpacker::Get()->LoopRunning() && TAnalyzer::Get()->qsize() == 0);
+
+    bool correlatorDone =
+      fOutputLevel == OutputLevel::Analyzer ||
+      fOutputLevel == OutputLevel::Unpacker ||
+      (!TCorrelator::Get()->LoopRunning() && Unpacker::Get()->qsize() == 0);
+
+    bool treeDone =
+      fOutputLevel != OutputLevel::Tree ||
+      !TTreeOut::Get()->LoopRunning();
+
+    return analyzerDone && unpackerDone && correlatorDone && treeDone;
+  };
+
+  while(true) {
+    printf(CLEAR_LINE);
+    printf(CURSOR_UP); printf(CLEAR_LINE);
+    printf(CURSOR_UP); printf(CLEAR_LINE);
+    printf(CURSOR_UP); printf(CLEAR_LINE);
+    printf(CURSOR_UP); printf(CLEAR_LINE);
+
+    printf("%s\n", TAnalyzer::Get()->Status().c_str());
+
+    if(fOutputLevel != OutputLevel::Analyzer)
+      printf("%s\n", Unpacker::Get()->Status().c_str());
+
+    if(fOutputLevel == OutputLevel::Correlator ||
+       fOutputLevel == OutputLevel::Tree)
+      printf("%s\n", TCorrelator::Get()->Status().c_str());
+
+    if(fOutputLevel == OutputLevel::Tree)
+      printf("%s\n", TTreeOut::Get()->Status().c_str());
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    if(done())
+      break;
+  }
+
+  printf("\n");
+}
 
 
 
