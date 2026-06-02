@@ -189,7 +189,12 @@ void TCorrelator::CorrelateOneDecay(const TFDSi &fdsi,double tdecay) {
       }
     }
   }
-  push(fdsi,fCorrelatedImplants);
+  
+  FillHistograms(fdsi,fCorrelatedImplants);
+  if(fForwardToNext)
+    push(fdsi,fCorrelatedImplants);
+  
+
   ClearImplants();
 }
 
@@ -272,6 +277,7 @@ void TCorrelator::ShowImplantVector(int dx,int dy) const {
 }
 
 
+void TCorrelator::FillHistograms(const TFDSi &fdsi,const std::vector<TImplant> &corrImplants) { } 
 
 
 

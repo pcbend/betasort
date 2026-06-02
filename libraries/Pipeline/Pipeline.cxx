@@ -9,7 +9,7 @@
 
 //loops
 #include <TAnalyzer.h>
-#include <Unpacker.h>                                                                                                         
+#include <Unpacker.h> 
 #include <TCorrelator.h>
 #include <TTreeOut.h>   
                         
@@ -18,7 +18,30 @@
 #include <utils.h>   
 #include <globals.h>
 
+namespace {
+  bool RunAnalyzer(OutputLevel level) {
+    return level == OutputLevel::Analyzer ||
+           level == OutputLevel::Unpacker ||
+           level == OutputLevel::Correlator ||
+           level == OutputLevel::Tree; 
+  }
+  
+  bool RunUnpacker(OutputLevel level) {
+    return level == OutputLevel::Unpacker ||
+           level == OutputLevel::Correlator ||
+           level == OutputLevel::Tree; 
+  }
 
+  bool RunCorrelator(OutputLevel level) {
+    return level == OutputLevel::Correlator ||
+           level == OutputLevel::Tree; 
+  }
+  
+  bool RunTreeOut(OutputLevel level) {
+    return level == OutputLevel::Tree; 
+  }
+
+}
 
 
 
@@ -43,9 +66,9 @@ void Pipeline::Run() {
   if(fOptions.tofFiles.size()) 
     TFDSi::SetTOFCorrector(fOptions.tofFiles.at(0));
 
-  for(auto file : fFilesToSort) { //bad things will currently happen if ever more then one file, tanalyzer is a singleton.
-    TAnalyzer::AddFile(file);
-  }            
+    for(auto file : fFilesToSort) { //bad things will currently happen if ever more then one file, tanalyzer is a singleton.
+      TAnalyzer::AddFile(file);
+    }            
 
   TFile *file =fFilesToSort[0];
   int run,subrun;
@@ -57,30 +80,52 @@ void Pipeline::Run() {
 
   /// loops ////
   //////////////
-  std::thread root2DDAS(&TAnalyzer::Loop,TAnalyzer::Get());
+  //TAnalyzer::Get(&fStats);
 
-  std::this_thread::sleep_for(std::chrono::seconds(1));
 
-  std::thread ddas2FDSi(&Unpacker::Unpack,Unpacker::Get());
-  std::thread FDSi2CorrFDSi(&TCorrelator::Correlate,TCorrelator::Get());
+  std::thread root2DDAS;
+  std::thread ddas2FDSi;
+  std::thread FDSi2CorrFDSi;
+  std::thread CorrFDSi2Tree;
 
-  if(fOptions.noTree)
-    TTreeOut::SetNoTree();
+  if(RunAnalyzer(fOptions.outputLevel)) {
+    if(fOptions.outputLevel>=OutputLevel::Unpacker)
+      TAnalyzer::Get()->SetForwardToNext(true);
+    root2DDAS = std::thread(&TAnalyzer::Loop,TAnalyzer::Get());
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+
+  if(RunUnpacker(fOptions.outputLevel)) {
+    if(fOptions.outputLevel>=OutputLevel::Correlator)
+      Unpacker::Get()->SetForwardToNext(true);
+    ddas2FDSi    = std::thread(&Unpacker::Unpack,Unpacker::Get());
+  }
+
+  if(RunCorrelator(fOptions.outputLevel)) {
+    if(fOptions.outputLevel>=OutputLevel::Tree)
+      TCorrelator::Get()->SetForwardToNext(true);
+    FDSi2CorrFDSi = std::thread(&TCorrelator::Correlate,TCorrelator::Get());
+  }
+
+  if(RunTreeOut(fOptions.outputLevel)) {
+    if(fOptions.noTree)
+      TTreeOut::SetNoTree();
   
-  TTreeOut::Get()->SetRun(run,subrun);
-  std::thread CorrFDSi2Tree(&TTreeOut::TreeLoop,TTreeOut::Get());
+    TTreeOut::Get()->SetRun(run,subrun);
+    CorrFDSi2Tree = std::thread(&TTreeOut::TreeLoop,TTreeOut::Get());
+  }
 
-  LoopProgress loopprogress;
-  std::thread progress(&LoopProgress::Show,&loopprogress);
+  //LoopProgress loopprogress;
+  //std::thread progress(&LoopProgress::Show,&loopprogress);
 
-  root2DDAS.join();
-  ddas2FDSi.join();
-  FDSi2CorrFDSi.join();
-  CorrFDSi2Tree.join();
-  progress.join();
+  if(root2DDAS.joinable())     root2DDAS.join();
+  if(ddas2FDSi.joinable())     ddas2FDSi.join();
+  if(FDSi2CorrFDSi.joinable()) FDSi2CorrFDSi.join();
+  if(CorrFDSi2Tree.joinable()) CorrFDSi2Tree.join();
+  //progress.join();
 
   Histogramer::Get()->Close();
-
+  //fStats.Print();
 }
 
 LoopProgress::LoopProgress() { }  

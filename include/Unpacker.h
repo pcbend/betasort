@@ -20,17 +20,21 @@ class Unpacker {
     
     long fIn;
     long fOut;
+    bool fForwardToNext=true;
 
   public:
     bool LoopRunning() const { return fLoopRunning; }
     std::queue<TFDSi> GetQ() { return fQueue; }
     size_t qsize(); // const { return fQueue.size(); }
+    bool SetForwardToNext(bool forward) { fForwardToNext = forward; return fForwardToNext; }
 
     void push(TFDSi &fdsi);
     //TFDSi pop(); 
     bool pop(TFDSi &fdsi);
 
     void Unpack();  // unpacking loop
+    
+    void FillHistograms(const TFDSi &fdsi);
 
     std::string Status();
 

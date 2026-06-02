@@ -393,7 +393,10 @@ void Unpacker::Unpack() {
     fdsi.fPID.ypos = fdsi.fLowGain1.ypos;
     fdsi.fPID.timestamp = fdsi.nPin1.Time();
 
-    push(fdsi);
+    FillHistograms(fdsi);
+
+    if(fForwardToNext)  
+      push(fdsi);
   }
 
 
@@ -408,6 +411,8 @@ std::string Unpacker::Status() {
   fOut =0;
   return s;
 }
+
+void Unpacker::FillHistograms(const TFDSi &fdsi) { } 
 
 
 

@@ -4,6 +4,13 @@
 #include <string>
 #include <vector>
 
+enum class OutputLevel {
+  Analyzer,
+  Unpacker, 
+  Correlator,
+  Tree
+};
+
 class BetaOptions {
   public:
     bool doHelp    = false;
@@ -11,6 +18,8 @@ class BetaOptions {
     bool noSort    = false;
     bool noTree    = false;
     bool doQuit    = false;
+
+    OutputLevel outputLevel = OutputLevel::Tree;
 
     std::vector<std::string> inputFiles;
 

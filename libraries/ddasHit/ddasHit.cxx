@@ -1,6 +1,7 @@
 #include<ddasHit.h>
 
 #include<cmath>
+#include <limits>
 
 ddasHit::ddasHit() { Clear(); }
 
@@ -11,7 +12,8 @@ void ddasHit::Clear() {
   evId   = ULLONG_MAX;
   id     = INT_MAX;
   energy = sqrt(-1);
-  time   = ULLONG_MAX;
+  //time   = ULLONG_MAX;
+  time   = std::numeric_limits<double>::quiet_NaN();
   cfd    = INT_MAX;
   //for(int i=0;i<8;i++) qdc[i] = INT_MAX;
   qdc.clear();

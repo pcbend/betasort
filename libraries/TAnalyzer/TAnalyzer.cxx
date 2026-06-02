@@ -161,11 +161,26 @@ void TAnalyzer::Loop() {
   entries = gChain->GetEntries();
   SetBranches();
 
- std::vector<ddasHit> hits;
- fLoopRunning = true;
- while(Next(hits)) {
+  std::vector<ddasHit> hits;
+  fLoopRunning = true;
+ 
+  while(true) {
+    //while(Next(hits)) {
     //fQueue.push(hits);
-    push(hits);
+    //auto nstart = std::chrono::steady_clock::now();
+    bool good = Next(hits);
+    //auto nstop = std::chrono::steady_clock::now();
+    //fStats->analyzer_next.Add(nstop - nstart);
+ 
+    if(!good) break;
+  
+    FillHistograms(hits);
+
+    //auto pstart = std::chrono::steady_clock::now();
+    if(fForwardToNext) 
+      push(hits);
+    //auto pstop = std::chrono::steady_clock::now();
+    //fStats->analyzer_push.Add(pstop - pstart);}
   }
   fLoopRunning = false;
 }
@@ -194,4 +209,8 @@ size_t TAnalyzer::qsize() {
   std::lock_guard<std::mutex> lock(fQueueMutex);
   return fQueue.size();
 }
+
+
+void TAnalyzer::FillHistograms(const std::vector<ddasHit>& hits) { }
+
 

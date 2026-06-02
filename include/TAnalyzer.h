@@ -42,7 +42,7 @@ class TAnalyzer : public TObject {
     bool GetBackwards() const { return fLoopBackwards; }
     void SetBackwards();
 
-    TChain *GetChain() { return gChain; }
+
 
   private:
     //tree data
@@ -72,6 +72,7 @@ class TAnalyzer : public TObject {
 
     long fIn;
     long fOut; 
+    bool fForwardToNext=true;
 
   public:
     std::queue<std::vector<ddasHit> > GetQ() { return fQueue; }
@@ -80,7 +81,11 @@ class TAnalyzer : public TObject {
     //std::vector<ddasHit> pop(); 
     bool pop(std::vector<ddasHit>& hits);
     size_t qsize(); // const { return fQueue.size(); }
+    bool SetForwardToNext(bool forward) { fForwardToNext = forward; return fForwardToNext; }
 
+    TChain *GetChain() { return gChain; }
+
+    void FillHistograms(const std::vector<ddasHit>& hits);
 
   ClassDef(TAnalyzer,0)
 };

@@ -35,11 +35,14 @@ class TCorrelator {
     std::atomic<bool> fLoopRunning{false};
     long fIn;
     long fOut;
+    bool fForwardToNext = true;
 
   public:
     bool LoopRunning() const { return fLoopRunning; }
     std::queue<std::pair<TFDSi,std::vector<TImplant> > > GetQ() { return fQueue; }
     size_t qsize(); // const { return fQueue.size(); }
+    bool SetForwardToNext(bool forward) { fForwardToNext = forward; return fForwardToNext; }
+
 
     void push(const TFDSi &fdsi,std::vector<TImplant> &corrImplants);
     //std::pair<TFDSi,std::vector<TImplant> > pop(); 
@@ -71,6 +74,7 @@ class TCorrelator {
     int  FinalizeDecays(double current_time);
     int  FlushDecays();
 
+    void FillHistograms(const TFDSi &fdsi,const std::vector<TImplant> &corrImplants);
 
 };
 
