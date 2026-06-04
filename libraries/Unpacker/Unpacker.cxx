@@ -417,8 +417,8 @@ void Unpacker::FillHistograms(const TFDSi &fdsi) {
 
 
     for(const auto &hit : fdsi.fClover.hits) {
-      Histogramer::fill("hpge_singles","clovers",100,0,100,hit.fId,
-                                                 8000,0,4000,hit.fEcal);
+      Histogramer::fill("hpge_singles","clovers",8000,0,4000,hit.fEcal,
+                                                 100,0,100,hit.fId);
     }
 } 
 
