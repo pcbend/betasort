@@ -422,21 +422,21 @@ void Unpacker::FillHistograms(const TFDSi &fdsi) {
                                                  100,0,100,hit.fId);
       for(const auto &hit2 : fdsi.fClover.hits) {
         if(&hit == &hit2) continue;
-        double e,dt, cdt;
+        double e,dt; //, cdt;
         if(hit.fEcal > hit2.fEcal) {
           e   = hit2.fEcal;
           dt  = hit.fTime - hit2.fTime;
-          cdt = hit.fCfdTime - hit2.fCfdTime;
+          //cdt = hit.fCfdTime - hit2.fCfdTime;
         } else {
           e   = hit.fEcal;
           dt  = hit2.fTime - hit.fTime;
-          cdt = hit2.fCfdTime - hit.fCfdTime;
+          //cdt = hit2.fCfdTime - hit.fCfdTime;
         }
         Histogramer::fill("hpge","ggTime",200,-100,100,dt,
                                           4000,0,12000,e);
-        //Histogramer::fill("hpge","ggCfdTime",2000,-1000,1000,cdt,
+        //Histogramer::fill("hpge","ggCfdTime",2000,-1000,1000,cdt,  //empty!
         //                                  4000,0,12000,e);
-        printf("cdt = %.4f\n",cdt);
+        //printf("cdt = %.4f\n",cdt);
       }
     }
     for(const auto &ab : fdsi.fClover.addbackHits) {
