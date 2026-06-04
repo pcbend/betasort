@@ -17,11 +17,11 @@ void TPIN::Reset()
   fHit    = 0;
 }
 
-TPIN::TPIN(ddasHit& ddashit) {
+TPIN::TPIN(const ddasHit& ddashit) {
   Unpack(ddashit);
 }
 
-void TPIN::Unpack(ddasHit &ddashit) {
+void TPIN::Unpack(const ddasHit &ddashit) {
 
   fTime = ddashit.GetTime();
   fEnergy = ddashit.GetEnergy() + gRandom->Rndm();

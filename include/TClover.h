@@ -41,7 +41,7 @@ class TClover : public TObject {
     static void ReadCalFile(std::string name);
     void Copy(TClover &other) const;
     void Reset();
-    void Unpack(ddasHit &chanhit, int det);
+    void Unpack(const ddasHit &chanhit, int det);
     //void AddBack();
 
 //  private:

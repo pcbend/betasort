@@ -75,7 +75,7 @@ void TClover::Reset() {
   hit = 0;
 }
 
-void TClover::Unpack(ddasHit &ddashit, int det)
+void TClover::Unpack(const ddasHit &ddashit, int det)
 {
   // position derived from crystal number
   int pos = det/4;

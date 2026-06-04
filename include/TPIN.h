@@ -10,12 +10,12 @@ class ddasHit;
 class TPIN: public TObject {
   public:
     TPIN();
-    TPIN(ddasHit &hit);
+    TPIN(const ddasHit &hit);
     ~TPIN();
 
     void Reset();
     void Copy(TPIN &other) const;
-    void Unpack(ddasHit &hit);
+    void Unpack(const ddasHit &hit);
     
 
     double Energy() const { return fEnergy; }

@@ -144,7 +144,7 @@ void Unpacker::Unpack() {
 
     double previoustime = 0;
 
-    for(ddasHit hit : hits) {
+    for(const ddasHit hit : hits) {
       if(previoustime==0) 
         previoustime = hit.GetTime();
       else 

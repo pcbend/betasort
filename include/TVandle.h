@@ -51,7 +51,7 @@ class TVandle : public TObject {
     void Copy(TVandle &other) const;
     void Reset();
     void Print(Option_t *opt="") const;
-    void Unpack(ddasHit &chanhit, int det=-1);
+    void Unpack(const ddasHit &chanhit, int det=-1);
     //void AddBack();
 
 //  private:

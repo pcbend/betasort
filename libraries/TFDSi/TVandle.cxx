@@ -103,7 +103,7 @@ void TVandle::Print(Option_t *opt) const {
 }
 
 
-void TVandle::Unpack(ddasHit &ddashit, int det)
+void TVandle::Unpack(const ddasHit &ddashit, int det)
 {
 
   // position derived from crystal number
