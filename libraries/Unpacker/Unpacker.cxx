@@ -384,6 +384,7 @@ void Unpacker::Unpack() {
     fdsi.fPID.ypos = fdsi.fLowGain1.ypos;
     fdsi.fPID.timestamp = fdsi.nPin1.Time();
 
+    fdsi.fClover.BuildAddback();
     FillHistograms(fdsi);
 
     if(fForwardToNext)  
@@ -419,6 +420,12 @@ void Unpacker::FillHistograms(const TFDSi &fdsi) {
     for(const auto &hit : fdsi.fClover.hits) {
       Histogramer::fill("hpge_singles","clovers",8000,0,4000,hit.fEcal,
                                                  100,0,100,hit.fId);
+    }
+    for(const auto &ab : fdsi.fClover.addbackHits) {
+      Histogramer::fill("hpge_singles","addback",8000,0,4000,ab.fEcal,
+                                                 100,0,100,ab.fId);
+      Histogramer::fill("hpge_singles","ab_mult",8000,0,4000,ab.fEcal,
+                                                 100,0,100,ab.Mult());
     }
 } 
 

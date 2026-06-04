@@ -11,6 +11,8 @@
 
 #pragma link C++ class TClock+;
 
+#pragma link C++ class TAddbackHit+;
+#pragma link C++ class std::vector<TAddbackHit>+;
 #pragma link C++ class TCloverHit+;
 #pragma link C++ class std::vector<TCloverHit>+;
 #pragma link C++ class TClover+;

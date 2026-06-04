@@ -31,6 +31,40 @@ void TCloverHit::Reset() {
 }
 
 
+TAddbackHit::TAddbackHit() :TCloverHit(),fMult(0) { } 
+
+TAddbackHit::~TAddbackHit() { } 
+
+bool TAddbackHit::CheckTime(const TCloverHit &other) const {
+  return std::abs(other.fTime - fTime) < 100; // 100 is made up atm
+}
+
+TAddbackHit::TAddbackHit(const TCloverHit &hit) :TCloverHit(hit),fMult(1) { 
+  fId =  hit.fId/4;
+  fEnergy = fEcal;
+} 
+
+void TAddbackHit::Reset() {
+  TCloverHit::Reset();
+  fMult = 0;
+}
+
+
+
+void TAddbackHit::Add(const TCloverHit &hit) {
+  fEcal += hit.fEcal;
+  if(hit.fEcal > fEnergy) {
+    fEnergy  = hit.fEcal;
+    fTime    = hit.fTime;
+    fCfdTime = hit.fCfdTime;
+  }
+  fMult++;
+}
+
+
+
+
+
 std::map<int,std::vector<double> > TClover::fCals;
 
 void TClover::ReadCalFile(std::string name) {
@@ -72,6 +106,7 @@ TClover::~TClover() { }
 
 void TClover::Reset() {
   hits.clear();
+  addbackHits.clear();
   hit = 0;
 }
 
@@ -99,7 +134,24 @@ void TClover::Copy(TClover &other) const {
   for(size_t i=0;i<hits.size();i++)
     other.hits.push_back(TCloverHit(hits[i]));
 
-
-
 }
+
+void TClover::BuildAddback() { 
+  addbackHits.clear();
+  for(const auto& hit : hits) {
+    const int addbackId = hit.fId/4;
+    if(addbackId < 0 || addbackId >= 16) continue;
+    bool added = false;
+    
+    for(auto& ab : addbackHits) {
+      if(ab.fId != addbackId) continue;
+      if(ab.CheckTime(hit))   continue;
+      ab.Add(hit);
+      added = true;
+      break;
+    }
+    if(!added) addbackHits.emplace_back(hit);
+  }
+} 
+
 
