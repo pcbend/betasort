@@ -442,9 +442,11 @@ void Unpacker::FillHistograms(const TFDSi &fdsi) {
         Histogramer::fill(dname1,"ggTime",200,-1000,1000,dt,
                                           4000,0,12000,e);
         if(hit.fId==1) {
+          dt  = hit.fTime - hit2.fTime;
           Histogramer::fill(dname1,"ggTID",200,-1000,1000,dt,
                                            70,0,70,hit2.fId);
         } else if(hit2.fId==1) {
+          dt  = hit2.fTime - hit1.fTime;
           Histogramer::fill(dname1,"ggTID",200,-1000,1000,dt,
                                            70,0,70,hit.fId);
         }
