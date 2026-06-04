@@ -415,6 +415,10 @@ void Unpacker::FillHistograms(const TFDSi &fdsi) {
 
     Histogramer::fill("EventType",100,0,100,fdsi.EventType());
 
+
+    for(const auto &hit : fdsi.fClover.hits) {
+      Histogramer::fill("hpge_singles","clovers",8000,0,4000,hit.fEcal);
+    }
 } 
 
 
