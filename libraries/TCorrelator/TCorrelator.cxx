@@ -149,8 +149,10 @@ void TCorrelator::StoreImplant(const TFDSi& fdsi, double current_time) {
   fImplantVector[xPos][yPos].emplace_back(fImplanted[xPos][yPos]);
 
   //dummy to get the fdsi implant info into the final tree....
-  std::vector<TImplant> empty;
-  push(fdsi,empty);
+  if(fForwardToNext) {
+    std::vector<TImplant> empty;
+    push(fdsi,empty);
+  }
 } 
 
 void TCorrelator::StoreDecay(const TFDSi& fdsi, double t) { 

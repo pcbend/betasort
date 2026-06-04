@@ -27,7 +27,7 @@ void TTreeOut::SetRun(int run,int subrun) {
   fSubRun = subrun;
 }
 
-TTreeOut::TTreeOut() : fFillCounter(0) { }
+TTreeOut::TTreeOut() : fIn(0),fOut(0), fFillCounter(0) { }
 
 TTreeOut::~TTreeOut() { }
 
