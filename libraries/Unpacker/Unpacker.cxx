@@ -418,9 +418,12 @@ void Unpacker::FillHistograms(const TFDSi &fdsi) {
 
     int eventType= fdsi.EventType();
     std::string dname = Form("hpge_%i",eventType);
+    std::string dname1 = "hpge";
 
     for(const auto &hit : fdsi.fClover.hits) {
       Histogramer::fill(dname,"clovers",8000,0,4000,hit.fEcal,
+                                                 100,0,100,hit.fId);
+      Histogramer::fill(dname1,"clovers",8000,0,4000,hit.fEcal,
                                                  100,0,100,hit.fId);
       for(const auto &hit2 : fdsi.fClover.hits) {
         if(&hit == &hit2) continue;
@@ -436,6 +439,15 @@ void Unpacker::FillHistograms(const TFDSi &fdsi) {
         }
         Histogramer::fill(dname,"ggTime",200,-1000,1000,dt,
                                           4000,0,12000,e);
+        Histogramer::fill(dname1,"ggTime",200,-1000,1000,dt,
+                                          4000,0,12000,e);
+        if(hit.fId==1) {
+          Histogramer::fill(dname1,"ggTID",200,-1000,1000,dt,
+                                           70,0,70,hit2.fId);
+        } else if(hit2.fId==1) {
+          Histogramer::fill(dname1,"ggTID",200,-1000,1000,dt,
+                                           70,0,70,hit.fId);
+        }
         //Histogramer::fill("hpge","ggCfdTime",2000,-1000,1000,cdt,  //empty!
         //                                  4000,0,12000,e);
         //printf("cdt = %.4f\n",cdt);
