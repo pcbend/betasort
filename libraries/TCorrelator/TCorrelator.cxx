@@ -43,7 +43,8 @@ std::mutex CorrelatorMtx;
 
 void TCorrelator::push(const TFDSi &fdsi,std::vector<TImplant> &corrImplants) {
   std::lock_guard<std::mutex> lock(CorrelatorMtx);
-  fQueue.push(std::make_pair(fdsi, corrImplants)); 
+  //fQueue.push(std::make_pair(fdsi, corrImplants)); 
+  fQueue.emplace(fdsi,std::move(corrImplants)); 
   fIn++;
   return;
 }
@@ -54,7 +55,7 @@ bool TCorrelator::pop(std::pair<TFDSi,std::vector<TImplant> > &item) {
   if(fQueue.empty()) {
     return false;
   }
-  item = fQueue.front();
+  item = std::move(fQueue.front());
   fQueue.pop();
   fOut++;
   return true;

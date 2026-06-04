@@ -28,9 +28,9 @@ Unpacker::~Unpacker() { }
 
 std::mutex UnpackerMtx; 
 
-void Unpacker::push(TFDSi &fdsi) {
+void Unpacker::push(TFDSi &&fdsi) {
   std::lock_guard<std::mutex> lock(UnpackerMtx);
-  fQueue.push(fdsi); 
+  fQueue.push(std::move(fdsi)); 
   fIn++;
   return;
 }
@@ -42,7 +42,7 @@ bool Unpacker::pop(TFDSi &fdsi) {
     return false;
   }
 
-  fdsi = fQueue.front();
+  fdsi = std::move(fQueue.front());
   fQueue.pop();
   fOut++;
   return true;
@@ -87,7 +87,7 @@ void Unpacker::Unpack() {
     int nanode  = 0;
     int ganode  = 0;
 
-    for(ddasHit hit : hits) {
+    for(const ddasHit &hit : hits) {
       //Histogramer::fill("summary",8000,0,4000,hit.GetEnergy(),
       //                            420,0,420,hit.GetId());
       //for(ddasHit hit2 : hits) {
@@ -387,7 +387,7 @@ void Unpacker::Unpack() {
     //FillHistograms(fdsi);
 
     if(fForwardToNext)  
-      push(fdsi);
+      push(std::move(fdsi));
   }
 
 
@@ -411,7 +411,7 @@ void Unpacker::FillHistograms(const TFDSi &fdsi) {
     //Histogramer::fill("gDynodeAnode",100,0,100,gdynode,100,0,100,ganode);
 
     //Histogramer::fill("DynodeDynode",100,0,100,ndynode,100,0,100,gdynode);
-    //Histogramer::fill("AnodeAnode",100,0,100,nanode,100,0,100,ganode);
+    ///Histogramer::fill("AnodeAnode",100,0,100,nanode,100,0,100,ganode);
 
     Histogramer::fill("EventType",100,0,100,fdsi.EventType());
 

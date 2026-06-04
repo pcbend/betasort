@@ -28,7 +28,7 @@ class Unpacker {
     size_t qsize(); // const { return fQueue.size(); }
     bool SetForwardToNext(bool forward) { fForwardToNext = forward; return fForwardToNext; }
 
-    void push(TFDSi &fdsi);
+    void push(TFDSi &&fdsi);
     //TFDSi pop(); 
     bool pop(TFDSi &fdsi);
 

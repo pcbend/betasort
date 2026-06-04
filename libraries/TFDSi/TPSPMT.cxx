@@ -83,7 +83,7 @@ void TPSPMT::Copy(TPSPMT &other) const {
 }
 
 
-void TPSPMT::UnpackDynode(ddasHit& ddashit) {
+void TPSPMT::UnpackDynode(const ddasHit& ddashit) {
   // extract hit information
   // put hit information into detector class
   // time
@@ -114,7 +114,7 @@ void TPSPMT::UnpackDynode(ddasHit& ddashit) {
 //  }
 }
 
-void TPSPMT::UnpackAnode(ddasHit& ddashit,int pix)
+void TPSPMT::UnpackAnode(const ddasHit& ddashit,int pix)
 {
   // extract hit information
   //amultraw++; // raw multiplicty

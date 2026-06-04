@@ -23,8 +23,8 @@ class TPSPMT : public TObject{
     ~TPSPMT();
 
     void Reset();
-    void UnpackDynode(ddasHit& ddashit);
-    void UnpackAnode(ddasHit& ddashit,int pix);
+    void UnpackDynode(const ddasHit& ddashit);
+    void UnpackAnode(const ddasHit& ddashit,int pix);
     void FitAnodePosition();
 
     int Hit() const { return hit; }
