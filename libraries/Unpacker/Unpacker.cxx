@@ -418,13 +418,30 @@ void Unpacker::FillHistograms(const TFDSi &fdsi) {
 
 
     for(const auto &hit : fdsi.fClover.hits) {
-      Histogramer::fill("hpge_singles","clovers",8000,0,4000,hit.fEcal,
+      Histogramer::fill("hpge","clovers",8000,0,4000,hit.fEcal,
                                                  100,0,100,hit.fId);
+      for(const auto &hit2 : fdsi.fClover.hits) {
+        if(&hit == &hit2) continue;
+        double e,dt, cdt;
+        if(hit.fEcal > hit2.fEcal) {
+          e   = hit2.fEcal;
+          dt  = hit.fTime - hit2.fTime;
+          cdt = hit.fCfdTime - hit2.fCfdTime;
+        } else {
+          e   = hit.fEcal;
+          dt  = hit2.fTime - hit.fTime;
+          cdt = hit2.fCfdTime - hit.fCfdTime;
+        }
+        Histogramer::fill("hpge","ggTime",2000,-1000,1000,dt,
+                                          4000,0,12000,e);
+        Histogramer::fill("hpge","ggCfdTime",2000,-1000,1000,cdt,
+                                          4000,0,12000,e);
+      }
     }
     for(const auto &ab : fdsi.fClover.addbackHits) {
-      Histogramer::fill("hpge_singles","addback",8000,0,4000,ab.fEcal,
+      Histogramer::fill("hpge","addback",8000,0,4000,ab.fEcal,
                                                  100,0,100,ab.fId);
-      Histogramer::fill("hpge_singles","ab_mult",8000,0,4000,ab.fEcal,
+      Histogramer::fill("hpge","ab_mult",8000,0,4000,ab.fEcal,
                                                  100,0,100,ab.Mult());
     }
 } 
