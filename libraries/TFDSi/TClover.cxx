@@ -36,7 +36,7 @@ TAddbackHit::TAddbackHit() :TCloverHit(),fMult(0) { }
 TAddbackHit::~TAddbackHit() { } 
 
 bool TAddbackHit::CheckTime(const TCloverHit &other) const {
-  return std::abs(other.fTime - fTime) < 100; // 100 is made up atm
+  return std::abs(other.fTime - fTime) < 200; // 100 is made up atm
 }
 
 TAddbackHit::TAddbackHit(const TCloverHit &hit) :TCloverHit(hit),fMult(1) { 
