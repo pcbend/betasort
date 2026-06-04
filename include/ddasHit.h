@@ -16,9 +16,9 @@ class ddasHit : public TObject {
    void setEnergy(const double E)              { energy = E; }
    void setTime(const double T)                { time   = T; }
    void setCFD(const int CFD)                  { cfd = CFD; }
-   void setQDC(const std::vector<int> QDC)     { qdc = QDC; }
+   void setQDC(const std::vector<int> &QDC)     { qdc = QDC; }
    void setTraceLength(const int TL)           { traceLength = TL; }
-   void setTrace(const std::vector<unsigned short> TRACE)  { trace = TRACE; }
+   void setTrace(const std::vector<unsigned short> &TRACE)  { trace = TRACE; }
 
    void Clear();
    void Copy(ddasHit& lhs) const;
@@ -33,8 +33,8 @@ class ddasHit : public TObject {
     int    GetCFDTime() const { return cfd; }
     int    GetId()      const { return id;  }
 
-    std::vector<unsigned short> GetTrace() const { return trace; }
-    std::vector<int> GetQDCSums() const { return qdc; }
+    const std::vector<unsigned short> &GetTrace() const { return trace; }
+    const std::vector<int> &GetQDCSums() const { return qdc; }
 
     void print() const;
 

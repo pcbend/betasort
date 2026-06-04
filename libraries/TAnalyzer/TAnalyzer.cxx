@@ -122,8 +122,11 @@ bool TAnalyzer::Next(std::vector<ddasHit> &hits) {
       gChain->GetEntry(current--);
     else
       gChain->GetEntry(current++);
+    if(hits.capacity() < static_cast<size_t>(multi))
+      hits.reserve(multi);
     for(int i=0;i<multi;i++) {
-      ddasHit hit;
+      hits.emplace_back();
+      ddasHit &hit = hits.back();
       hit.setEvId(evID);
       hit.setId(id->at(i));
       hit.setEnergy(e->at(i));
@@ -131,7 +134,7 @@ bool TAnalyzer::Next(std::vector<ddasHit> &hits) {
       hit.setCFD(cfd->at(i));
       hit.setQDC(qdc->at(i));
       hit.setTrace(trace->at(i));
-      hits.push_back(hit);
+      //hits.push_back(hit);
     }
     return true;
   }
