@@ -432,7 +432,7 @@ void Unpacker::FillHistograms(const TFDSi &fdsi) {
           dt  = hit2.fTime - hit.fTime;
           //cdt = hit2.fCfdTime - hit.fCfdTime;
         }
-        Histogramer::fill("hpge","ggTime",200,-100,100,dt,
+        Histogramer::fill("hpge","ggTime",2000,-100,100,dt,
                                           4000,0,12000,e);
         //Histogramer::fill("hpge","ggCfdTime",2000,-1000,1000,cdt,  //empty!
         //                                  4000,0,12000,e);
