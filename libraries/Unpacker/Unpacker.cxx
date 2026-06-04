@@ -90,12 +90,11 @@ void Unpacker::Unpack() {
     for(ddasHit hit : hits) {
       Histogramer::fill("summary",8000,0,4000,hit.GetEnergy(),
                                   420,0,420,hit.GetId());
-      for(ddasHit hit2 : hits) {
-        if(hit==hit2) continue;
-          Histogramer::fill("gg_all",8000,0,4000,hit.GetEnergy(),
-                                      8000,0,4000,hit.GetEnergy());
-
-       }
+      //for(ddasHit hit2 : hits) {
+      //  if(hit==hit2) continue;
+      //    Histogramer::fill("gg_all",8000,0,4000,hit.GetEnergy(),
+      //                                8000,0,4000,hit.GetEnergy());
+      // }
       fdsi.fClock.current = hit.GetTime();
       fdsi.fHitMap.push_back(hit.GetId());
       if(fdsi.fClock.initial<0) fdsi.fClock.initial = fdsi.fClock.current; 
