@@ -178,7 +178,7 @@ void TAnalyzer::Loop() {
 
     //auto pstart = std::chrono::steady_clock::now();
     if(fForwardToNext) 
-      push(hits);
+      push(std::move(hits));
     //auto pstop = std::chrono::steady_clock::now();
     //fStats->analyzer_push.Add(pstop - pstart);}
   }
@@ -186,9 +186,9 @@ void TAnalyzer::Loop() {
 }
 
 
-void TAnalyzer::push(std::vector<ddasHit> &hits) {
+void TAnalyzer::push(std::vector<ddasHit> &&hits) {
   std::lock_guard<std::mutex> lock(fQueueMutex);
-  fQueue.push(hits); 
+  fQueue.push(std::move(hits)); 
   fIn++;
   return;
 }
@@ -199,7 +199,7 @@ bool TAnalyzer::pop(std::vector<ddasHit>& hits) {
   if(fQueue.empty())
     return false;
 
-  hits = fQueue.front();
+  hits = std::move(fQueue.front());
   fQueue.pop();
   fOut++;
   return true;

@@ -77,7 +77,7 @@ class TAnalyzer : public TObject {
   public:
     std::queue<std::vector<ddasHit> > GetQ() { return fQueue; }
 
-    void push(std::vector<ddasHit> &hits);
+    void push(std::vector<ddasHit> &&hits);
     //std::vector<ddasHit> pop(); 
     bool pop(std::vector<ddasHit>& hits);
     size_t qsize(); // const { return fQueue.size(); }
