@@ -170,7 +170,7 @@ void LoopProgress::Show() {
 } 
 */
 
-
+/*
 void LoopProgress::Show() {
   printf("\n\n");
 
@@ -221,16 +221,82 @@ void LoopProgress::Show() {
 
   printf("\n");
 }
+*/
 
+void LoopProgress::Show() {
+  auto num_lines = [this]() {
+    switch(fOutputLevel) {
+      case OutputLevel::Analyzer:   return 1;
+      case OutputLevel::Unpacker:   return 2;
+      case OutputLevel::Correlator: return 3;
+      case OutputLevel::Tree:       return 4;
+    }
+    return 4;
+  };
 
+  auto done = [this]() {
+    bool analyzerDone =
+      !TAnalyzer::Get()->LoopRunning();
 
+    bool unpackerDone =
+      fOutputLevel == OutputLevel::Analyzer ||
+      (!Unpacker::Get()->LoopRunning() &&
+       TAnalyzer::Get()->qsize() == 0);
 
+    bool correlatorDone =
+      fOutputLevel == OutputLevel::Analyzer ||
+      fOutputLevel == OutputLevel::Unpacker ||
+      (!TCorrelator::Get()->LoopRunning() &&
+       Unpacker::Get()->qsize() == 0);
 
+    bool treeDone =
+      fOutputLevel != OutputLevel::Tree ||
+      !TTreeOut::Get()->LoopRunning();
 
+    return analyzerDone && unpackerDone && correlatorDone && treeDone;
+  };
 
+  auto print_status = [this]() {
+    printf("%s\n", TAnalyzer::Get()->Status().c_str());
 
+    if(fOutputLevel != OutputLevel::Analyzer)
+      printf("%s\n", Unpacker::Get()->Status().c_str());
 
+    if(fOutputLevel == OutputLevel::Correlator ||
+       fOutputLevel == OutputLevel::Tree)
+      printf("%s\n", TCorrelator::Get()->Status().c_str());
 
+    if(fOutputLevel == OutputLevel::Tree)
+      printf("%s\n", TTreeOut::Get()->Status().c_str());
+  };
+
+  auto clear_status = [&num_lines]() {
+    int n = num_lines();
+
+    for(int i = 0; i < n; ++i) {
+      printf(CURSOR_UP);
+      printf(CLEAR_LINE);
+    }
+  };
+
+  printf("\n");
+
+  print_status();
+  fflush(stdout);
+
+  while(true) {
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    clear_status();
+    print_status();
+    fflush(stdout);
+
+    if(done())
+      break;
+  }
+
+  printf("\n");
+}
 
 
 
