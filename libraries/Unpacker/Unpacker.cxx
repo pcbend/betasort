@@ -88,8 +88,8 @@ void Unpacker::Unpack() {
     int ganode  = 0;
 
     for(ddasHit hit : hits) {
-      Histogramer::fill("summary",8000,0,4000,hit.GetEnergy(),
-                                  420,0,420,hit.GetId());
+      //Histogramer::fill("summary",8000,0,4000,hit.GetEnergy(),
+      //                            420,0,420,hit.GetId());
       //for(ddasHit hit2 : hits) {
       //  if(hit==hit2) continue;
       //    Histogramer::fill("gg_all",8000,0,4000,hit.GetEnergy(),
@@ -140,13 +140,6 @@ void Unpacker::Unpack() {
           break;
       };
     }
-    Histogramer::fill("buildTime",10000,-5000,5000,fdsi.fClock.current - fdsi.fClock.initial);
-    
-    Histogramer::fill("nDynodeAnode",100,0,100,ndynode,100,0,100,nanode);
-    Histogramer::fill("gDynodeAnode",100,0,100,gdynode,100,0,100,ganode);
-
-    Histogramer::fill("DynodeDynode",100,0,100,ndynode,100,0,100,gdynode);
-    Histogramer::fill("AnodeAnode",100,0,100,nanode,100,0,100,ganode);
 
 
     double previoustime = 0;
@@ -382,7 +375,6 @@ void Unpacker::Unpack() {
        fdsi.fLowGain2.FitAnodePosition();
     }         
     fdsi.fEventType = fdsi.EventType();
-    Histogramer::fill("EventType",100,0,100,fdsi.EventType());
 
     //set the PID...
     fdsi.fPID.de1 =  fdsi.nPin1.Ecal();
@@ -392,7 +384,7 @@ void Unpacker::Unpack() {
     fdsi.fPID.ypos = fdsi.fLowGain1.ypos;
     fdsi.fPID.timestamp = fdsi.nPin1.Time();
 
-    FillHistograms(fdsi);
+    //FillHistograms(fdsi);
 
     if(fForwardToNext)  
       push(fdsi);
@@ -411,7 +403,19 @@ std::string Unpacker::Status() {
   return s;
 }
 
-void Unpacker::FillHistograms(const TFDSi &fdsi) { } 
+void Unpacker::FillHistograms(const TFDSi &fdsi) { 
+
+    Histogramer::fill("buildTime",10000,-5000,5000,fdsi.fClock.current - fdsi.fClock.initial);
+    
+    Histogramer::fill("nDynodeAnode",100,0,100,ndynode,100,0,100,nanode);
+    Histogramer::fill("gDynodeAnode",100,0,100,gdynode,100,0,100,ganode);
+
+    Histogramer::fill("DynodeDynode",100,0,100,ndynode,100,0,100,gdynode);
+    Histogramer::fill("AnodeAnode",100,0,100,nanode,100,0,100,ganode);
+
+    Histogramer::fill("EventType",100,0,100,fdsi.EventType());
+
+} 
 
 
 
