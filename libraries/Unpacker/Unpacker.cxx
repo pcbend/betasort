@@ -416,9 +416,11 @@ void Unpacker::FillHistograms(const TFDSi &fdsi) {
 
     Histogramer::fill("EventType",100,0,100,fdsi.EventType());
 
+    int eventType= fdsi.EventType();
+    std::string dname = Form("hpge_%i",eventType);
 
     for(const auto &hit : fdsi.fClover.hits) {
-      Histogramer::fill("hpge","clovers",8000,0,4000,hit.fEcal,
+      Histogramer::fill(dname,"clovers",8000,0,4000,hit.fEcal,
                                                  100,0,100,hit.fId);
       for(const auto &hit2 : fdsi.fClover.hits) {
         if(&hit == &hit2) continue;
@@ -432,7 +434,7 @@ void Unpacker::FillHistograms(const TFDSi &fdsi) {
           dt  = hit2.fTime - hit.fTime;
           //cdt = hit2.fCfdTime - hit.fCfdTime;
         }
-        Histogramer::fill("hpge","ggTime",200,-1000,1000,dt,
+        Histogramer::fill(dname,"ggTime",200,-1000,1000,dt,
                                           4000,0,12000,e);
         //Histogramer::fill("hpge","ggCfdTime",2000,-1000,1000,cdt,  //empty!
         //                                  4000,0,12000,e);
@@ -440,9 +442,10 @@ void Unpacker::FillHistograms(const TFDSi &fdsi) {
       }
     }
     for(const auto &ab : fdsi.fClover.addbackHits) {
-      Histogramer::fill("hpge","addback",8000,0,4000,ab.fEcal,
+
+      Histogramer::fill(dname,"addback",8000,0,4000,ab.fEcal,
                                                  100,0,100,ab.fId);
-      Histogramer::fill("hpge","ab_mult",8000,0,4000,ab.fEcal,
+      Histogramer::fill(dname,"ab_mult",8000,0,4000,ab.fEcal,
                                                  100,0,100,ab.Mult());
     }
 } 
