@@ -213,7 +213,7 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TImplant>& implants) const
           double dtime = (fdsi.fClock.initial/1.e6) - implants.at(z).mtime();
           Histogramer::fill(blob->GetName(),"dtimeOnly",2000,-1000,1000,dtime);
           Histogramer::fill(blob->GetName(),"dtimefom",6000,-1000,5000,dtime,
-                                                             1000,0,0,implants.at(z).fom);
+                                                             1000,0,1000,implants.at(z).fom);
           //for(int y=0;y<fdsi.fClover.hits.size();y++) {
           //  TCloverHit hit = fdsi.fClover.hits.at(y);
           for(const auto &hit : fdsi.fClover.hits) {
