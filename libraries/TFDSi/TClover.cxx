@@ -123,7 +123,7 @@ void TClover::Unpack(const ddasHit &ddashit, int det)
   hit.fEcal    = 0.0;
   for(size_t i=0;i<fCals[det].size();i++) 
     hit.fEcal += pow(hit.fEnergy,i)*fCals[det].at(i);
-  if(hit.fEcal<10. || hit.fEcal >8192. ) 
+  if(hit.fEcal<10. || hit.fEcal>8192.) return; 
   hits.push_back(hit);
 }
 
