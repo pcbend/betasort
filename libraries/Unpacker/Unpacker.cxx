@@ -29,6 +29,10 @@ Unpacker::~Unpacker() { }
 std::mutex UnpackerMtx; 
 
 void Unpacker::push(TFDSi &&fdsi) {
+  while(qsize()>=fMaxQueueSize) 
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+
   std::lock_guard<std::mutex> lock(UnpackerMtx);
   fQueue.push(std::move(fdsi)); 
   fIn++;

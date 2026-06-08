@@ -4,6 +4,9 @@
 
 #include <cstdio>
 #include <string>
+#include <thread>
+#include <chrono>
+
 
 #include <TFile.h>
 #include <TChain.h>
@@ -190,6 +193,9 @@ void TAnalyzer::Loop() {
 
 
 void TAnalyzer::push(std::vector<ddasHit> &&hits) {
+  while(qsize() >= fMaxQueueSize)  
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
   std::lock_guard<std::mutex> lock(fQueueMutex);
   fQueue.push(std::move(hits)); 
   fIn++;

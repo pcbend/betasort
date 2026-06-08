@@ -22,6 +22,8 @@ class Unpacker {
     long fOut;
     bool fForwardToNext=true;
 
+    size_t fMaxQueueSize = 1000;
+
   public:
     bool LoopRunning() const { return fLoopRunning; }
     std::queue<TFDSi> GetQ() { return fQueue; }
