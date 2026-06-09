@@ -74,7 +74,7 @@ class TAnalyzer : public TObject {
     long fOut; 
     bool fForwardToNext=true;
 
-    size_t fMaxQueueSize = 1000;
+    size_t fMaxQueueSize = 100000;
 
   public:
     std::queue<std::vector<ddasHit> > GetQ() { return fQueue; }

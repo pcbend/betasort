@@ -22,7 +22,7 @@ class Unpacker {
     long fOut;
     bool fForwardToNext=true;
 
-    size_t fMaxQueueSize = 1000;
+    size_t fMaxQueueSize = 100000;
 
   public:
     bool LoopRunning() const { return fLoopRunning; }

@@ -20,6 +20,8 @@ class ddasHit : public TObject {
    void setTraceLength(const int TL)           { traceLength = TL; }
    void setTrace(const std::vector<unsigned short> &TRACE)  { trace = TRACE; }
 
+   //void SetCustomQDC(const val)  { cqdc = val; }
+
    void Clear();
    void Copy(ddasHit& lhs) const;
 
@@ -46,6 +48,7 @@ class ddasHit : public TObject {
     int cfd;
     //int qdc[8];
     std::vector<int> qdc;
+    //double           cqdc
 
     int traceLength;
     std::vector<unsigned short> trace;
