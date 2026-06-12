@@ -145,7 +145,7 @@ void TClover::BuildAddback() {
     
     for(auto& ab : addbackHits) {
       if(ab.fId != addbackId) continue;
-      if(ab.CheckTime(hit))   continue;
+      if(!ab.CheckTime(hit))   continue;
       ab.Add(hit);
       added = true;
       break;
