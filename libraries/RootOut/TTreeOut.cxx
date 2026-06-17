@@ -114,6 +114,7 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TImplant>& implants) const
   if(!Histogramer::Get()->GetBlobs()) {
     printf("CUTS:   %s\n\n\n\n\n\n",Form("%s/gates/myPid_de2.cuts",getenv("BSYS")));
     Histogramer::Get()->SetBlobGates(Form("%s/gates/myPid_de2.cuts",getenv("BSYS")));
+    Histogramer::Get()->SetGammaPrompt(Form("%s/gates/gtime.cuts",getenv("BSYS")));
   }
 
   if(!neutron) {
@@ -215,16 +216,19 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TImplant>& implants) const
           //Histogramer::fill(blob->GetName(),"dtimefom",6000,-1000,5000,dtime,
           //                                                   1000,0,1000,implants.at(z).fom);
           for(const auto &hit : fdsi.fClover.hits) {
-            Histogramer::fill(blob->GetName(),"gtime",500,-2000,2000,fdsi.fLowGain1.dytime - hit.fTime,
+            double gdt = fdsi.fLowGain1.dytime - hit.fTime;
+            Histogramer::fill(blob->GetName(),"gtime",500,-2000,2000,gdt, //fdsi.fLowGain1.dytime - hit.fTime,
                 1000,0,4000,hit.fEcal);
-
+            if(!Histogramer::Get()->GetGammaPrompt()->IsInside(gdt,hit.fEcal)) continue;
             Histogramer::fill(blob->GetName(),"gsummary",16000,0,8000,hit.fEcal,
                 70,0,70,hit.fId);
 
             if( (dtime>0 && dtime<100) || (dtime>900 && dtime<1000) ) { 
               for(const auto &hit1 : fdsi.fClover.hits) {
                 if(&hit == &hit1) continue;
-                if(std::abs(hit.fTime - hit1.fTime)>200) continue; // 100 is made up atm
+                //if(std::abs(hit.fTime - hit1.fTime)>200) continue; // 100 is made up atm
+                double gdt1 = fdsi.fLowGain1.dytime - hit1.fTime;
+                if(!Histogramer::Get()->GetGammaPrompt()->IsInside(gdt1,hit1.fEcal)) continue;
                 if(dtime>0 && dtime<100) 
                   Histogramer::fill(blob->GetName(),"gg_0_100",4000,0,4000,hit.fEcal,
                                                                4000,0,4000,hit1.fEcal);

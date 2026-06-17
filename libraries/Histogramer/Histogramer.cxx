@@ -43,6 +43,7 @@ int Histogramer::SetBlobGates(std::string cutfile) {
     printf("FAILED to load cuts from %s\n",cutfile.c_str());
     return ncuts;
   }
+
   TIter iter(CF->GetListOfKeys());
   while(TKey *key = (TKey*)iter.Next()) {
     TCutG *cut = (TCutG*)key->ReadObj();
@@ -50,6 +51,22 @@ int Histogramer::SetBlobGates(std::string cutfile) {
     ncuts++;
     printf("loaded cut %s\n",cut->GetName());
   }
+  return ncuts;
+}
+
+int Histogramer::SetGammaPrompt(std::string cutfile) {
+ 
+  int ncuts=0;
+
+  TFile *CF = TFile::Open(cutfile.c_str());
+  if(!CF) {
+    printf("FAILED to load cuts from %s\n",cutfile.c_str());
+    return ncuts;
+  }
+
+  fGammaPrompt = (TCutG*)CF->Get("gtime");
+  if(fGammaPrompt)
+    ncuts++;
   return ncuts;
 }
 

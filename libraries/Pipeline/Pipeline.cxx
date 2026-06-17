@@ -47,6 +47,7 @@ namespace {
 
 Pipeline::Pipeline(BetaOptions options) {
   fOptions = options;
+  printf("output level set to: %i\n",(int)options.outputLevel);
 }
 
 void Pipeline::AddFile(TFile *file)  {
@@ -88,24 +89,34 @@ void Pipeline::Run() {
   std::thread FDSi2CorrFDSi;
   std::thread CorrFDSi2Tree;
 
-  if(RunAnalyzer(fOptions.outputLevel)) {
-    if(fOptions.outputLevel>=OutputLevel::Unpacker)
-      TAnalyzer::Get()->SetForwardToNext(true);
-    root2DDAS = std::thread(&TAnalyzer::Loop,TAnalyzer::Get());
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-  }
 
-  if(RunUnpacker(fOptions.outputLevel)) {
-    if(fOptions.outputLevel>=OutputLevel::Correlator)
-      Unpacker::Get()->SetForwardToNext(true);
-    ddas2FDSi    = std::thread(&Unpacker::Unpack,Unpacker::Get());
-  }
 
-  if(RunCorrelator(fOptions.outputLevel)) {
-    if(fOptions.outputLevel>=OutputLevel::Tree)
-      TCorrelator::Get()->SetForwardToNext(true);
-    FDSi2CorrFDSi = std::thread(&TCorrelator::Correlate,TCorrelator::Get());
-  }
+if(RunAnalyzer(fOptions.outputLevel)) {
+    TAnalyzer::Get()->SetForwardToNext(
+        fOptions.outputLevel >= OutputLevel::Unpacker
+          );
+
+      root2DDAS = std::thread(&TAnalyzer::Loop, TAnalyzer::Get());
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+if(RunUnpacker(fOptions.outputLevel)) {
+    Unpacker::Get()->SetForwardToNext(
+        fOptions.outputLevel >= OutputLevel::Correlator
+          );
+
+      ddas2FDSi = std::thread(&Unpacker::Unpack, Unpacker::Get());
+}
+
+if(RunCorrelator(fOptions.outputLevel)) {
+    TCorrelator::Get()->SetForwardToNext(
+        fOptions.outputLevel >= OutputLevel::Tree
+          );
+
+      FDSi2CorrFDSi = std::thread(&TCorrelator::Correlate, TCorrelator::Get());
+}
+
+
 
   if(RunTreeOut(fOptions.outputLevel)) {
     if(fOptions.noTree)

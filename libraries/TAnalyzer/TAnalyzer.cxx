@@ -220,6 +220,9 @@ size_t TAnalyzer::qsize() {
 }
 
 
-void TAnalyzer::FillHistograms(const std::vector<ddasHit>& hits) { }
+void TAnalyzer::FillHistograms(const std::vector<ddasHit>& hits) { 
+
+
+ }
 
 

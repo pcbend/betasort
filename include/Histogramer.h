@@ -8,7 +8,7 @@
 
 #include <TList.h>
 
-
+class TCutG;
 
 class Histogramer {
   private:
@@ -23,6 +23,7 @@ class Histogramer {
     
     void SetRun(int run,int subrun);
     int SetBlobGates(std::string cutfile);
+    int SetGammaPrompt(std::string cutfile);
 
     static void Close();
 
@@ -36,11 +37,14 @@ class Histogramer {
 
     TList *GetBlobs() const { return fBlobGates; }
 
+    TCutG *GetGammaPrompt() const { return fGammaPrompt; }
+
   private:
     int fRun;
     int fSubrun;
 
     TList *fBlobGates;
+    TCutG *fGammaPrompt;
 
   ClassDef(Histogramer,0);
 
