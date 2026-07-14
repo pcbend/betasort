@@ -205,23 +205,23 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TImplant>& implants) const
     //testing.
     //******************************//
     //******************************//
-    printf("decay:\n");
-    for(int z=0;z<int(implants.size());z++) {
-      double dtime = (fdsi.fClock.initial/1.e6) - implants.at(z).mtime();
-      TIter iter(Histogramer::Get()->GetBlobs());
-      std::string name = "";
-      while(TCutG* blob = (TCutG*)iter.Next()) {
-        if(blob->IsInside(implants.at(z).tof,implants.at(z).de2)) { 
-          name = blob->GetName();
-          break;
-        } 
-      }
-      //print time, dr2, fom, name.
-      if(implants.at(z).fom<4.0) { printf(GREEN); } // ~ 3 pixel radius 
-      printf("\t%i\t%.1f\t%.1f\t%.1f\t%s\n",z,dtime,implants.at(z).dr2,implants.at(z).fom,name.c_str()); 
-      printf(RESET_COLOR);
+    //printf("decay:\n");
+    //for(int z=0;z<int(implants.size());z++) {
+    //  double dtime = (fdsi.fClock.initial/1.e6) - implants.at(z).mtime();
+    //  TIter iter(Histogramer::Get()->GetBlobs());
+    //  std::string name = "";
+    //  while(TCutG* blob = (TCutG*)iter.Next()) {
+    //    if(blob->IsInside(implants.at(z).tof,implants.at(z).de2)) { 
+    //      name = blob->GetName();
+    //      break;
+    //    } 
+    //  }
+    //  //print time, dr2, fom, name.
+    //  if(implants.at(z).fom<4.0) { printf(GREEN); } // ~ 3 pixel radius 
+    //  printf("\t%i\t%.1f\t%.1f\t%.1f\t%s\n",z,dtime,implants.at(z).dr2,implants.at(z).fom,name.c_str()); 
+    //  printf(RESET_COLOR);
 
-    }
+    //}
     //******************************//
     //******************************//
 
@@ -230,19 +230,22 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TImplant>& implants) const
     while(TCutG* blob = (TCutG*)iter.Next()) {
       //for each blob, check if the any implant in the implant list matches. 
       for(int z=0;z<int(implants.size());z++) {
+        if(implants.at(z).fom > 4.01) continue; 
         bool first = true;
         if(blob->IsInside(implants.at(z).tof,implants.at(z).de2)) { 
           double dtime = (fdsi.fClock.initial/1.e6) - implants.at(z).mtime();
           Histogramer::fill(blob->GetName(),"dtimeOnly",2000,-1000,5000,dtime);
-          //Histogramer::fill(blob->GetName(),"dtimefom",6000,-1000,5000,dtime,
-          //                                                   1000,0,1000,implants.at(z).fom);
           for(const auto &hit : fdsi.fClover.hits) {
             double gdt = fdsi.fLowGain1.dytime - hit.fTime;
             Histogramer::fill(blob->GetName(),"gtime",500,-2000,2000,gdt, //fdsi.fLowGain1.dytime - hit.fTime,
-                1000,0,4000,hit.fEcal);
-            if(!Histogramer::Get()->GetGammaPrompt()->IsInside(gdt,hit.fEcal)) continue;
+                                                      1000,0,4000,hit.fEcal);
+            
+            //if(!Histogramer::Get()->GetGammaPrompt()->IsInside(gdt,hit.fEcal)) continue;  // this condition makes gsummary different then dtimeOnly
+            if(gdt<200. || gdt>500.) continue; 
+
+
             Histogramer::fill(blob->GetName(),"gsummary",16000,0,8000,hit.fEcal,
-                70,0,70,hit.fId);
+                                                        70,0,70,hit.fId);
 
             if( (dtime>0 && dtime<100) || (dtime>900 && dtime<1000) ) { 
               for(const auto &hit1 : fdsi.fClover.hits) {
@@ -251,11 +254,11 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TImplant>& implants) const
                 double gdt1 = fdsi.fLowGain1.dytime - hit1.fTime;
                 if(!Histogramer::Get()->GetGammaPrompt()->IsInside(gdt1,hit1.fEcal)) continue;
                 if(dtime>0 && dtime<100) 
-                  Histogramer::fill(blob->GetName(),"gg_0_100",4000,0,4000,hit.fEcal,
-                                                               4000,0,4000,hit1.fEcal);
+                  Histogramer::fill(blob->GetName(),"gg_0_100",8000,0,8000,hit.fEcal,
+                                                               8000,0,8000,hit1.fEcal);
                 if(dtime>900 && dtime<1000) 
-                  Histogramer::fill(blob->GetName(),"gg_900_1000",4000,0,4000,hit.fEcal,
-                                                                  4000,0,4000,hit1.fEcal);
+                  Histogramer::fill(blob->GetName(),"gg_900_1000",8000,0,8000,hit.fEcal,
+                                                                  8000,0,8000,hit1.fEcal);
               }
             }
             Histogramer::fill(blob->GetName(),"gdtime",6000,-1000,5000,dtime,
@@ -277,8 +280,10 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TImplant>& implants) const
           }
 
           for(const auto &hit : fdsi.fClover.addbackHits) {
+            double gdt = fdsi.fLowGain1.dytime - hit.fTime;
             Histogramer::fill(blob->GetName(),"atime",500,-2000,2000,fdsi.fLowGain1.dytime - hit.fTime,
                 1000,0,4000,hit.fEcal);
+            if(gdt<200. || gdt>500.) continue; 
 
             Histogramer::fill(blob->GetName(),"asummary",16000,0,8000,hit.fEcal,
                 20,0,20,hit.fId);
@@ -288,11 +293,11 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TImplant>& implants) const
                 if(&hit == &hit1) continue;
                 if(std::abs(hit.fTime - hit1.fTime)>200) continue; // 100 is made up atm
                 if(dtime>0 && dtime<100) 
-                  Histogramer::fill(blob->GetName(),"aa_0_100",4000,0,4000,hit.fEcal,
-                                                               4000,0,4000,hit1.fEcal);
+                  Histogramer::fill(blob->GetName(),"aa_0_100",8000,0,8000,hit.fEcal,
+                                                               8000,0,8000,hit1.fEcal);
                 if(dtime>900 && dtime<1000) 
-                  Histogramer::fill(blob->GetName(),"aa_900_1000",4000,0,4000,hit.fEcal,
-                                                                  4000,0,4000,hit1.fEcal);
+                  Histogramer::fill(blob->GetName(),"aa_900_1000",8000,0,8000,hit.fEcal,
+                                                                  8000,0,8000,hit1.fEcal);
               }
             }
             Histogramer::fill(blob->GetName(),"adtime",6000,-1000,5000,dtime,
