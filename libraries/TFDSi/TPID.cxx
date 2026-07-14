@@ -41,12 +41,12 @@ TImplant::TImplant(const TPID& imp,const TFDSi& decay) : TPID(imp) {
   dr2   = dx*dx + dy*dy;
   
   const double sigmaR = 1.5;    // pixels
-  const double sigmaT = 200.0;  // ms
+  //const double sigmaT = 200.0;  // ms
 
-  if(dtime>0) 
-    fom = dr2/(sigmaR*sigmaR) + (dtime*dtime)/(sigmaT*sigmaT);
-  else 
-    fom = -1;
+  //if(dtime>0) 
+    fom = dr2/(sigmaR*sigmaR);// + (dtime*dtime)/(sigmaT*sigmaT);
+  //else 
+  //  fom = -1;
 }
 
 
