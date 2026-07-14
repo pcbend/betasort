@@ -463,19 +463,18 @@ void Unpacker::FillHistograms(const TFDSi &fdsi) {
         //printf("cdt = %.4f\n",cdt);
       }
     }
-    for(const auto &ab : fdsi.fClover.addbackHits) {
 
+    for(const auto &ab : fdsi.fClover.addbackHits) {
       Histogramer::fill(dname,"addback",8000,0,4000,ab.fEcal,
                                                  100,0,100,ab.fId);
       Histogramer::fill(dname,"ab_mult",8000,0,4000,ab.fEcal,
                                                  100,0,100,ab.Mult());
         
-
       for(const auto &ab2 : fdsi.fClover.addbackHits) {
         if(&ab == &ab2) continue;
-        Histogramer::fill(dname,"gg",8000,0,4000,ab.fEcal,
+        Histogramer::fill(dname,"aa",8000,0,4000,ab.fEcal,
                                      8000,0,4000,ab2.fEcal);
-        Histogramer::fill(dname,"gg",8000,0,4000,ab2.fEcal,
+        Histogramer::fill(dname,"aa",8000,0,4000,ab2.fEcal,
                                      8000,0,4000,ab.fEcal);
       }
 
