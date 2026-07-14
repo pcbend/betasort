@@ -215,7 +215,9 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TImplant>& implants) const
         } 
       }
       //print time, dr2, fom, name.
+      if(fom<4.0) { printf(GREEN); } // ~ 3 pixel radius 
       printf("\t%i\t%.1f\t%.1f\t%.1f\t%s\n",z,dtime,implants.at(z).dr2,implants.at(z).fom,name.c_str()); 
+      printf(RESET_COLOR);
 
     }
     //******************************//
