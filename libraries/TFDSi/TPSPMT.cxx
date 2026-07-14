@@ -135,8 +135,8 @@ void TPSPMT::UnpackAnode(const ddasHit& ddashit,int pix)
   // |t_anode-t_dynode| < dycoincwindow AND athresh < e_anode < auld.
 
   //TODO: histogram time -dytime.
-  Histogramer::fill("timeDytime",2000,-10000,10000,time-dytime);
-  Histogramer::fill("anodeEnergy",8000,0,64000,ec,500,0,500,ddashit.GetId());
+  //Histogramer::fill("timeDytime",2000,-10000,10000,time-dytime);
+  //Histogramer::fill("anodeEnergy",8000,0,64000,ec,500,0,500,ddashit.GetId());
 
   //if(std::abs(time - dytime) < 10000.) {  // HERE - the dytime MUST be set first to use this....
   if(std::abs(time - dytime) < 150.) {  // HERE - the dytime MUST be set first to use this....

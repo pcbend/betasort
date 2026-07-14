@@ -160,8 +160,8 @@ int TFDSi::EventType() const {
     hasPSPMTHigh = true;
 
   //pin 1 implant vs light ion.
-  Histogramer::fill("gPin1",60000,0,60000,gPin1.Ecal(),
-                            2,0,2,gPin1.Hit());
+  //Histogramer::fill("gPin1",60000,0,60000,gPin1.Ecal(),
+  //                          2,0,2,gPin1.Hit());
   if(gPin1.Hit()) {
     hasPin01 = true;
     if(gPin1.Ecal() > 500) // implant threshold on pin1
@@ -171,8 +171,8 @@ int TFDSi::EventType() const {
   }
 
   //pin 2 implant vs light ion.
-  Histogramer::fill("gPin2",60000,0,60000,gPin2.Ecal(),
-                            2,0,2,gPin2.Hit());
+  //Histogramer::fill("gPin2",60000,0,60000,gPin2.Ecal(),
+  //                          2,0,2,gPin2.Hit());
   if(gPin2.Hit()) {
     hasPin02 = true;
     if(gPin2.Ecal() > 500) // implant threshold on pin1

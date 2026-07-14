@@ -428,7 +428,7 @@ void Unpacker::FillHistograms(const TFDSi &fdsi) {
       //Histogramer::fill(dname,"clovers",8000,0,4000,hit.fEcal,
       //                                           100,0,100,hit.fId);
       Histogramer::fill(dname,"clovers",8000,0,4000,hit.fEcal,
-                                                 100,0,100,hit.fId);
+                                        100,0,100,hit.fId);
       for(const auto &hit2 : fdsi.fClover.hits) {
         if(&hit == &hit2) continue;
         double e,dt; //, cdt;
@@ -442,31 +442,17 @@ void Unpacker::FillHistograms(const TFDSi &fdsi) {
           //cdt = hit2.fCfdTime - hit.fCfdTime;
         }
         Histogramer::fill(dname,"ggTime",400,-1000,1000,dt,
-                                          1000,0,4000,e);
+                                             1000,0,4000,e);
         Histogramer::fill(dname,"gg",8000,0,4000,hit.fEcal,
                                      8000,0,4000,hit2.fEcal);
         Histogramer::fill(dname,"gg",8000,0,4000,hit2.fEcal,
                                      8000,0,4000,hit.fEcal);
-        //Histogramer::fill(dname1,"ggTime",200,-1000,1000,dt,
-        //                                  4000,0,12000,e);
-        //if(hit.fId==1) {
-        //  dt  = hit.fTime - hit2.fTime;
-        //  Histogramer::fill(dname1,"ggTID",200,-1000,1000,dt,
-        //                                   70,0,70,hit2.fId);
-        //} else if(hit2.fId==1) {
-        //  dt  = hit2.fTime - hit.fTime;
-        //  Histogramer::fill(dname1,"ggTID",200,-1000,1000,dt,
-        //                                   70,0,70,hit.fId);
-        //}
-        //Histogramer::fill("hpge","ggCfdTime",2000,-1000,1000,cdt,  //empty!
-        //                                  4000,0,12000,e);
-        //printf("cdt = %.4f\n",cdt);
       }
     }
 
     for(const auto &ab : fdsi.fClover.addbackHits) {
       Histogramer::fill(dname,"addback",8000,0,4000,ab.fEcal,
-                                                 100,0,100,ab.fId);
+                                        100,0,100,ab.fId);
       Histogramer::fill(dname,"ab_mult",8000,0,4000,ab.fEcal,
                                                  100,0,100,ab.Mult());
         

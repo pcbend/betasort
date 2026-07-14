@@ -128,17 +128,16 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TImplant>& implants) const
 
 
     Histogramer::fill("PID",500 ,-180,-130,fdsi.GetTOF(),
-        1500,1000,2500,fdsi.fPID.de2);
+                            1500,1000,2500,fdsi.fPID.de2);
 
-    Histogramer::fill("tof_time",720,0,7200,fdsi.fClock.initial/1e9,
-        500,-180,-130,fdsi.GetTOF());   
+    Histogramer::fill("tof_time",720,   0, 7200,fdsi.fClock.initial/1e9,
+                                 500,-180, -130,fdsi.GetTOF());   
 
-    Histogramer::fill("tof_time_uncorrected",720,0,7200,fdsi.fClock.initial/1e9,
-        500,-180,-130,fdsi.fPID.tof);   
+    //Histogramer::fill("tof_time_uncorrected",720,0,7200,fdsi.fClock.initial/1e9,
+    //                                         500,-180,-130,fdsi.fPID.tof);   
 
-
-    Histogramer::fill("de2_time",720,0,7200,fdsi.fClock.initial/1e9,
-        500,-180,-130,fdsi.fPID.de2);   
+    //Histogramer::fill("de2_time",720,0,7200,fdsi.fClock.initial/1e9,
+    //                             500,-180,-130,fdsi.fPID.de2);   
 
     double dxpos = (fdsi.fLowGain1.xpos);
     double dypos = (fdsi.fLowGain1.ypos);
@@ -155,34 +154,29 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TImplant>& implants) const
 
     for(int y=0;y<fdsi.fClover.hits.size();y++) {
       TCloverHit hit = fdsi.fClover.hits.at(y);
-      Histogramer::fill("gtime",500,-2000,2000,fdsi.fLowGain1.dytime - hit.fTime,
-          1000,0,4000,hit.fEcal);
+      Histogramer::fill("decayEvent","gtime",500,-2000,2000,fdsi.fLowGain1.dytime - hit.fTime,
+                                             1000,0,4000,hit.fEcal);
 
-      Histogramer::fill("gsummary",8000,0,4000,hit.fEcal,
-          70,0,70,hit.fId);
-      Histogramer::fill("gsummary_raw",20000,0,20000,hit.fEcal,
-          70,0,70,hit.fId);
+      Histogramer::fill("decayEvent","gsummary",8000,0,4000,hit.fEcal,
+                                                70,0,70,hit.fId);
     }
 
     int nmult =0;
-
     for(int y=0;y<fdsi.fVandle.fHits.size();y++) {
       TVandleHit hit = fdsi.fVandle.fHits.at(y);
-      Histogramer::fill("vsummaryRight",4000,0,4000,hit.fEnergyRight,
-                                       200,0,200,hit.fId);
-      Histogramer::fill("vsummaryLeft",4000,0,4000,hit.fEnergyLeft,
-                                       200,0,200,hit.fId);
-      Histogramer::fill("vTDiff",400,-2000,2000,hit.fTimeLeft - hit.fTimeRight,
-                                       200,0,200,hit.fId);
-      Histogramer::fill("vTOF",400,0,3200,hit.fTimeRight - fdsi.fLowGain1.dytime,
-                               4000,0,4000,hit.fEnergyLeft + hit.fEnergyRight);
-      
-      Histogramer::fill("vTOFR",400,0,3200,hit.fTimeRight - fdsi.fLowGain1.dytime,
-                               4000,0,4000,hit.GetQDC());
-      Histogramer::fill("vTOFL",400,0,3200,hit.fTimeLeft - fdsi.fLowGain1.dytime,
-                               4000,0,4000,hit.GetQDC());
-
-
+      //Histogramer::fill("vsummaryRight",4000,0,4000,hit.fEnergyRight,
+      //                                 200,0,200,hit.fId);
+      //Histogramer::fill("vsummaryLeft",4000,0,4000,hit.fEnergyLeft,
+      //                                 200,0,200,hit.fId);
+      //Histogramer::fill("vTDiff",400,-2000,2000,hit.fTimeLeft - hit.fTimeRight,
+      //                                 200,0,200,hit.fId);
+      //Histogramer::fill("vTOF",400,0,3200,hit.fTimeRight - fdsi.fLowGain1.dytime,
+      //                         4000,0,4000,hit.fEnergyLeft + hit.fEnergyRight);
+      //
+      //Histogramer::fill("vTOFR",400,0,3200,hit.fTimeRight - fdsi.fLowGain1.dytime,
+      //                         4000,0,4000,hit.GetQDC());
+      //Histogramer::fill("vTOFL",400,0,3200,hit.fTimeLeft - fdsi.fLowGain1.dytime,
+      //                         4000,0,4000,hit.GetQDC());
       if(neutron && neutron->IsInside(hit.fTimeLeft - fdsi.fLowGain1.dytime,hit.GetQDC())) {
         nmult++;
       }
@@ -203,11 +197,34 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TImplant>& implants) const
       }
 */      
     }
-
     Histogramer::fill("nmult",100,0,100,nmult);
 
+
+    //testing.
+    //******************************//
+    //******************************//
+    printf("decay:\n");
+    for(int z=0;z<int(implants.size());z++) {
+      double dtime = (fdsi.fClock.initial/1.e6) - implants.at(z).mtime();
+      TIter iter(Histogramer::Get()->GetBlobs());
+      std::string name = "";
+      while(TCutG* blob = (TCutG*)iter.Next()) {
+        if(blob->IsInside(implants.at(z).tof,implants.at(z).de2)) { 
+          name = blob->GetName();
+          break;
+        } 
+      }
+      //print time, dr2, fom, name.
+      printf("\t%i\t%.1f\t%.1f\t%.1f\t%s\n",z,dtime,implants.at(z).dr2,implants.at(z).fom,name.c_str()); 
+
+    }
+    //******************************//
+    //******************************//
+
+    //loop over blobs.
     TIter iter(Histogramer::Get()->GetBlobs());
     while(TCutG* blob = (TCutG*)iter.Next()) {
+      //for each blob, check if the any implant in the implant list matches. 
       for(int z=0;z<int(implants.size());z++) {
         bool first = true;
         if(blob->IsInside(implants.at(z).tof,implants.at(z).de2)) { 
