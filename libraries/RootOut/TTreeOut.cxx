@@ -1,4 +1,3 @@
-
 #include <TTreeOut.h>
 
 #include <TCorrelator.h>
@@ -11,12 +10,16 @@
 #include <TFDSi.h>
 #include <TPID.h>
 
+#include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <cstdlib>
 #include <thread>
+#include <vector>
 
 #include <globals.h>
 
-TTreeOut* TTreeOut::fTreeOut = 0;  
+TTreeOut* TTreeOut::fTreeOut = 0;
 std::mutex TTreeOut::fTreeOutMutex;
 
 bool TTreeOut::fNoTree = false;
@@ -24,16 +27,16 @@ bool TTreeOut::fNoTree = false;
 int TTreeOut::fRun = 0;
 int TTreeOut::fSubRun = 0;
 
-void TTreeOut::SetRun(int run,int subrun) {
+void TTreeOut::SetRun(int run, int subrun) {
   fRun = run;
   fSubRun = subrun;
 }
 
-TTreeOut::TTreeOut() : fIn(0),fOut(0), fFillCounter(0) { }
+TTreeOut::TTreeOut() : fIn(0), fOut(0), fFillCounter(0) { }
 
 TTreeOut::~TTreeOut() { }
 
-TTreeOut *TTreeOut::Get() { 
+TTreeOut* TTreeOut::Get() {
   if(!fTreeOut) {
     std::lock_guard<std::mutex> lock(fTreeOutMutex);
     fTreeOut = new TTreeOut();
@@ -41,49 +44,52 @@ TTreeOut *TTreeOut::Get() {
   return fTreeOut;
 }
 
-bool sortTime(TImplant one, TImplant two){return one.timestamp > two.timestamp;}
+bool sortTime(TImplant one, TImplant two) {
+  return one.timestamp > two.timestamp;
+}
 
 void TTreeOut::TreeLoop() {
   fLoopRunning = true;
 
-  TFDSi *fdsi = 0;
-  std::vector<TImplant> *implants =0;
+  TFDSi* fdsi = 0;
+  std::vector<TImplant>* implants = 0;
 
-  TDirectory *current = gDirectory;
-  TFile *outfile = 0;
-  TTree *tree    = 0;
+  TDirectory* current = gDirectory;
+  TFile* outfile = 0;
+  TTree* tree = 0;
 
   if(!fNoTree) {
-    outfile = new TFile(Form("beta%04i-%02i.root",fRun,fSubRun),"recreate");
-    tree    = new TTree("beta","beta-tree");
+    outfile = new TFile(Form("beta%04i-%02i.root", fRun, fSubRun), "recreate");
+    tree = new TTree("beta", "beta-tree");
 
-    tree->Branch("TFDSi",&fdsi);
-    tree->Branch("Implants",&implants);
+    tree->Branch("TFDSi", &fdsi);
+    tree->Branch("Implants", &implants);
   }
 
-  while(true) { 
-    if(!TCorrelator::Get()->LoopRunning() &&  TCorrelator::Get()->qsize()==0) 
+  while(true) {
+    if(!TCorrelator::Get()->LoopRunning() && TCorrelator::Get()->qsize() == 0)
       break;
-    std::pair<TFDSi,std::vector<TImplant> > temp;
-    if(!TCorrelator::Get()->pop(temp))  {
+
+    std::pair<TFDSi, std::vector<TImplant>> temp;
+    if(!TCorrelator::Get()->pop(temp)) {
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
       continue;
     }
     fIn++;
 
-    if(temp.first.fEventType<0) {
+    if(temp.first.fEventType < 0) {
       std::this_thread::sleep_for(std::chrono::milliseconds(10));
       continue;
     }
-    //std::sort(implants->begin(),implants->end(),sortTime);
-    std::sort(temp.second.begin(),temp.second.end(),sortTime);
 
-    MakeHistograms(temp.first,temp.second);
+    std::sort(temp.second.begin(), temp.second.end(), sortTime);
+
+    MakeHistograms(temp.first, temp.second);
 
     if(!fNoTree) {
       std::lock_guard<std::mutex> lock(fTreeOutMutex);
       TFDSi tempFDSi = temp.first;
-      tempFDSi.Copy(*fdsi);  //copies into fdsi
+      tempFDSi.Copy(*fdsi);
 
       *implants = temp.second;
 
@@ -92,7 +98,6 @@ void TTreeOut::TreeLoop() {
     }
     fOut++;
   }
-
 
   if(!fNoTree) {
     tree->Write();
@@ -104,230 +109,292 @@ void TTreeOut::TreeLoop() {
 
 std::string TTreeOut::Status() {
   std::lock_guard<std::mutex> lock(fTreeOutMutex);
-  std::string s = Form("TreeOut: in[%lu]  out[%lu]  filled[%lu]",fIn,fOut,fFillCounter);
+  std::string s = Form("TreeOut: in[%lu]  out[%lu]  filled[%lu]", fIn, fOut, fFillCounter);
   return s;
 }
 
-TCutG *neutron = 0;
+TCutG* neutron = 0;
 
-
-void TTreeOut::MakeHistograms(TFDSi& fdsi,std::vector<TImplant>& implants) const { 
+void TTreeOut::MakeHistograms(TFDSi& fdsi,
+                              std::vector<TImplant>& implants) const {
 
   if(!Histogramer::Get()->GetBlobs()) {
-    printf("CUTS:   %s\n\n\n\n\n\n",Form("%s/gates/myPid_de2.cuts",getenv("BSYS")));
-    Histogramer::Get()->SetBlobGates(Form("%s/gates/myPid_de2.cuts",getenv("BSYS")));
-    Histogramer::Get()->SetGammaPrompt(Form("%s/gates/gtime.cuts",getenv("BSYS")));
+    printf("CUTS:   %s\n\n\n\n\n\n",
+           Form("%s/gates/myPid_de2.cuts", getenv("BSYS")));
+    Histogramer::Get()->SetBlobGates(
+        Form("%s/gates/myPid_de2.cuts", getenv("BSYS")));
+    Histogramer::Get()->SetGammaPrompt(
+        Form("%s/gates/gtime.cuts", getenv("BSYS")));
   }
 
   if(!neutron) {
-    TFile *f = TFile::Open("gates/neutron.cuts");
-    neutron = (TCutG*)f->Get("neutron");
+    TFile* f = TFile::Open("gates/neutron.cuts");
+    neutron = static_cast<TCutG*>(f->Get("neutron"));
   }
 
-  Histogramer::fill("runtime",3600,0,3600000,fdsi.fClock.initial/1e6);
+  Histogramer::fill("runtime", 3600, 0, 3600000,
+                    fdsi.fClock.initial / 1.e6);
 
-  if(fdsi.fEventType==4) { //implant
+  if(fdsi.fEventType == 4) { // implant
 
+    Histogramer::fill("PID",
+                      500, -180, -130, fdsi.GetTOF(),
+                      1500, 1000, 2500, fdsi.fPID.de2);
 
-    Histogramer::fill("PID",500 ,-180,-130,fdsi.GetTOF(),
-                            1500,1000,2500,fdsi.fPID.de2);
+    Histogramer::fill("tof_time",
+                      720, 0, 7200, fdsi.fClock.initial / 1.e9,
+                      500, -180, -130, fdsi.GetTOF());
 
-    Histogramer::fill("tof_time",720,   0, 7200,fdsi.fClock.initial/1e9,
-                                 500,-180, -130,fdsi.GetTOF());   
+    Histogramer::fill("implantX",
+                      2000, 0, 48, fdsi.fLowGain1.xpos,
+                      4000, 0, 64000, fdsi.fLowGain1.dyenergy);
 
-    //Histogramer::fill("tof_time_uncorrected",720,0,7200,fdsi.fClock.initial/1e9,
-    //                                         500,-180,-130,fdsi.fPID.tof);   
+    Histogramer::fill("implantY",
+                      2000, 0, 48, fdsi.fLowGain1.ypos,
+                      4000, 0, 64000, fdsi.fLowGain1.dyenergy);
 
-    //Histogramer::fill("de2_time",720,0,7200,fdsi.fClock.initial/1e9,
-    //                             500,-180,-130,fdsi.fPID.de2);   
+    return;
+  }
 
-    double dxpos = (fdsi.fLowGain1.xpos);
-    double dypos = (fdsi.fLowGain1.ypos);
+  if(fdsi.fEventType != 12) // not a decay
+    return;
 
-    Histogramer::fill("implantX",2000,0,48,fdsi.fLowGain1.xpos,4000,0,64000,fdsi.fLowGain1.dyenergy);
-    Histogramer::fill("implantY",2000,0,48,fdsi.fLowGain1.ypos,4000,0,64000,fdsi.fLowGain1.dyenergy);
+  Histogramer::fill("decayX",
+                    2000, 0, 48, fdsi.fLowGain1.xpos,
+                    4000, 0, 64000, fdsi.fLowGain1.dyenergy);
 
-  } else if(fdsi.fEventType==12) { //decay
-    double dxpos = (fdsi.fLowGain1.xpos);
-    double dypos = (fdsi.fLowGain1.ypos);
+  Histogramer::fill("decayY",
+                    2000, 0, 48, fdsi.fLowGain1.ypos,
+                    4000, 0, 64000, fdsi.fLowGain1.dyenergy);
 
-    Histogramer::fill("decayX",2000,0,48,fdsi.fLowGain1.xpos,4000,0,64000,fdsi.fLowGain1.dyenergy);
-    Histogramer::fill("decayY",2000,0,48,fdsi.fLowGain1.ypos,4000,0,64000,fdsi.fLowGain1.dyenergy);
+  // Ungated decay-event gamma-ray spectra. These are filled once per decay.
+  for(const auto& hit : fdsi.fClover.hits) {
+    const double gdt = fdsi.fLowGain1.dytime - hit.fTime;
 
-    for(int y=0;y<fdsi.fClover.hits.size();y++) {
-      TCloverHit hit = fdsi.fClover.hits.at(y);
-      Histogramer::fill("decayEvent","gtime",500,-2000,2000,fdsi.fLowGain1.dytime - hit.fTime,
-                                             1000,0,4000,hit.fEcal);
+    Histogramer::fill("decayEvent", "gtime",
+                      500, -2000, 2000, gdt,
+                      1000, 0, 4000, hit.fEcal);
 
-      Histogramer::fill("decayEvent","gsummary",8000,0,4000,hit.fEcal,
-                                                70,0,70,hit.fId);
+    Histogramer::fill("decayEvent", "gsummary",
+                      8000, 0, 4000, hit.fEcal,
+                      70, 0, 70, hit.fId);
+  }
+
+  int nmult = 0;
+  for(const auto& hit : fdsi.fVandle.fHits) {
+    if(neutron &&
+       neutron->IsInside(hit.fTimeLeft - fdsi.fLowGain1.dytime,
+                         hit.GetQDC())) {
+      nmult++;
+    }
+  }
+  Histogramer::fill("nmult", 100, 0, 100, nmult);
+
+  /*
+   * For each PID gate:
+   *
+   *   1. Build the list of acceptable correlated implants in that gate.
+   *   2. Fill gamma/addback singles and timing spectra once per decay.
+   *   3. Fill decay-time-dependent spectra once for every possible
+   *      implant-decay pair.
+   *
+   * This prevents gsummary/asummary/gtime/atime from being multiplied when
+   * more than one correlated implant passes the same PID gate.
+   */
+  TIter iter(Histogramer::Get()->GetBlobs());
+  while(TCutG* blob = static_cast<TCutG*>(iter.Next())) {
+    std::vector<const TImplant*> matchingImplants;
+    matchingImplants.reserve(implants.size());
+
+    for(const auto& implant : implants) {
+      if(implant.fom > 4.01)
+        continue;
+
+      if(blob->IsInside(implant.tof, implant.de2))
+        matchingImplants.push_back(&implant);
     }
 
-    int nmult =0;
-    for(int y=0;y<fdsi.fVandle.fHits.size();y++) {
-      TVandleHit hit = fdsi.fVandle.fHits.at(y);
-      //Histogramer::fill("vsummaryRight",4000,0,4000,hit.fEnergyRight,
-      //                                 200,0,200,hit.fId);
-      //Histogramer::fill("vsummaryLeft",4000,0,4000,hit.fEnergyLeft,
-      //                                 200,0,200,hit.fId);
-      //Histogramer::fill("vTDiff",400,-2000,2000,hit.fTimeLeft - hit.fTimeRight,
-      //                                 200,0,200,hit.fId);
-      //Histogramer::fill("vTOF",400,0,3200,hit.fTimeRight - fdsi.fLowGain1.dytime,
-      //                         4000,0,4000,hit.fEnergyLeft + hit.fEnergyRight);
-      //
-      //Histogramer::fill("vTOFR",400,0,3200,hit.fTimeRight - fdsi.fLowGain1.dytime,
-      //                         4000,0,4000,hit.GetQDC());
-      //Histogramer::fill("vTOFL",400,0,3200,hit.fTimeLeft - fdsi.fLowGain1.dytime,
-      //                         4000,0,4000,hit.GetQDC());
-      if(neutron && neutron->IsInside(hit.fTimeLeft - fdsi.fLowGain1.dytime,hit.GetQDC())) {
-        nmult++;
-      }
-/*
-      double dt = fdsi.fLowGain1.dytime - hit.fTimeRight;
-      for(size_t z=0;z<hit.fTrace.size();z++) {
-        Histogramer::fill("vTrace",150,0,150,z,
-                                   4000,0,0,hit.fTrace.at(z));
-        if(dt<20 && dt>-20)
-          Histogramer::fill("vTrace_g",150,0,150,z,
-                                     4000,0,0,hit.fTrace.at(z));
-        if(dt<-50)
-          Histogramer::fill("vTrace_n",150,0,150,z,
-                                     4000,0,0,hit.fTrace.at(z));
-        if(dt>50)
-          Histogramer::fill("vTrace_bg",150,0,150,z,
-                                     4000,0,0,hit.fTrace.at(z));
-      }
-*/      
+    if(matchingImplants.empty())
+      continue;
+
+    const char* gateName = blob->GetName();
+
+    // Diagnostic: number of acceptable implants for this decay and PID gate.
+    Histogramer::fill(gateName, "implantMultiplicity",
+                      20, 0, 20, matchingImplants.size());
+
+    /*
+     * Event-level crystal spectra.
+     * These quantities do not depend on which implant is selected, so each
+     * gamma ray is filled only once for this decay and PID gate.
+     */
+    for(const auto& hit : fdsi.fClover.hits) {
+      const double gdt = fdsi.fLowGain1.dytime - hit.fTime;
+
+      Histogramer::fill(gateName, "gtime",
+                        500, -2000, 2000, gdt,
+                        1000, 0, 4000, hit.fEcal);
+
+      if(gdt < 200.0 || gdt > 500.0)
+        continue;
+
+      Histogramer::fill(gateName, "gsummary",
+                        16000, 0, 8000, hit.fEcal,
+                        70, 0, 70, hit.fId);
     }
-    Histogramer::fill("nmult",100,0,100,nmult);
+
+    /*
+     * Event-level addback spectra.
+     * These are also filled only once for this decay and PID gate.
+     */
+    for(const auto& hit : fdsi.fClover.addbackHits) {
+      const double gdt = fdsi.fLowGain1.dytime - hit.fTime;
+
+      Histogramer::fill(gateName, "atime",
+                        500, -2000, 2000, gdt,
+                        1000, 0, 4000, hit.fEcal);
+
+      if(gdt < 200.0 || gdt > 500.0)
+        continue;
+
+      Histogramer::fill(gateName, "asummary",
+                        16000, 0, 8000, hit.fEcal,
+                        20, 0, 20, hit.fId);
+    }
+
+    /*
+     * Pair-level spectra.
+     * Each candidate implant has a different decay time, so retain every
+     * acceptable implant-decay pair here.
+     */
+    bool first = true;
+    for(const TImplant* implant : matchingImplants) {
+      const double dtime =
+          fdsi.fClock.initial / 1.e6 - implant->mtime();
+
+      Histogramer::fill(gateName, "dtimeOnly",
+                        2000, -1000, 5000, dtime);
+      if(first) 
+        Histogramer::fill(gateName, "dtimeOnlyi_first",
+                                     2000, -1000, 5000, dtime);
 
 
-    //testing.
-    //******************************//
-    //******************************//
-    //printf("decay:\n");
-    //for(int z=0;z<int(implants.size());z++) {
-    //  double dtime = (fdsi.fClock.initial/1.e6) - implants.at(z).mtime();
-    //  TIter iter(Histogramer::Get()->GetBlobs());
-    //  std::string name = "";
-    //  while(TCutG* blob = (TCutG*)iter.Next()) {
-    //    if(blob->IsInside(implants.at(z).tof,implants.at(z).de2)) { 
-    //      name = blob->GetName();
-    //      break;
-    //    } 
-    //  }
-    //  //print time, dr2, fom, name.
-    //  if(implants.at(z).fom<4.0) { printf(GREEN); } // ~ 3 pixel radius 
-    //  printf("\t%i\t%.1f\t%.1f\t%.1f\t%s\n",z,dtime,implants.at(z).dr2,implants.at(z).fom,name.c_str()); 
-    //  printf(RESET_COLOR);
+      for(const auto& hit : fdsi.fClover.hits) {
+        const double gdt = fdsi.fLowGain1.dytime - hit.fTime;
 
-    //}
-    //******************************//
-    //******************************//
+        if(gdt < 200.0 || gdt > 500.0)
+          continue;
 
-    //loop over blobs.
-    TIter iter(Histogramer::Get()->GetBlobs());
-    while(TCutG* blob = (TCutG*)iter.Next()) {
-      //for each blob, check if the any implant in the implant list matches. 
-      for(int z=0;z<int(implants.size());z++) {
-        if(implants.at(z).fom > 4.01) continue; 
-        bool first = true;
-        if(blob->IsInside(implants.at(z).tof,implants.at(z).de2)) { 
-          double dtime = (fdsi.fClock.initial/1.e6) - implants.at(z).mtime();
-          Histogramer::fill(blob->GetName(),"dtimeOnly",2000,-1000,5000,dtime);
-          for(const auto &hit : fdsi.fClover.hits) {
-            double gdt = fdsi.fLowGain1.dytime - hit.fTime;
-            Histogramer::fill(blob->GetName(),"gtime",500,-2000,2000,gdt, //fdsi.fLowGain1.dytime - hit.fTime,
-                                                      1000,0,4000,hit.fEcal);
-            
-            //if(!Histogramer::Get()->GetGammaPrompt()->IsInside(gdt,hit.fEcal)) continue;  // this condition makes gsummary different then dtimeOnly
-            if(gdt<200. || gdt>500.) continue; 
+        Histogramer::fill(gateName, "gdtime",
+                          6000, -1000, 5000, dtime,
+                          8000, 0, 8000, hit.fEcal);
+        if(first)
+          Histogramer::fill(gateName, "gdtime_first",
+                                      6000, -1000, 5000, dtime,
+                                      8000, 0, 8000, hit.fEcal);
 
+        if(nmult > 0) {
+          Histogramer::fill(gateName, "gdtimeAN",
+                            6000, -1000, 5000, dtime,
+                            8000, 0, 8000, hit.fEcal);
+          if(first)
+          Histogramer::fill(gateName, "gdtimeAN_first",
+                                        6000, -1000, 5000, dtime,
+                                        8000, 0, 8000, hit.fEcal);
+        }
 
-            Histogramer::fill(blob->GetName(),"gsummary",16000,0,8000,hit.fEcal,
-                                                        70,0,70,hit.fId);
+        if((dtime > 0.0 && dtime < 250.0) ||
+           (dtime > 2000.0 && dtime < 2500.0)) {
+          for(const auto& hit1 : fdsi.fClover.hits) {
+            if(&hit == &hit1)
+              continue;
 
-            if( (dtime>0 && dtime<100) || (dtime>900 && dtime<1000) ) { 
-              for(const auto &hit1 : fdsi.fClover.hits) {
-                if(&hit == &hit1) continue;
-                //if(std::abs(hit.fTime - hit1.fTime)>200) continue; // 100 is made up atm
-                double gdt1 = fdsi.fLowGain1.dytime - hit1.fTime;
-                if(!Histogramer::Get()->GetGammaPrompt()->IsInside(gdt1,hit1.fEcal)) continue;
-                if(dtime>0 && dtime<100) 
-                  Histogramer::fill(blob->GetName(),"gg_0_100",8000,0,8000,hit.fEcal,
-                                                               8000,0,8000,hit1.fEcal);
-                if(dtime>900 && dtime<1000) 
-                  Histogramer::fill(blob->GetName(),"gg_900_1000",8000,0,8000,hit.fEcal,
-                                                                  8000,0,8000,hit1.fEcal);
-              }
+            const double gdt1 = fdsi.fLowGain1.dytime - hit1.fTime;
+            if(!Histogramer::Get()->GetGammaPrompt()->IsInside(gdt1,
+                                                                hit1.fEcal)) {
+              continue;
             }
-            Histogramer::fill(blob->GetName(),"gdtime",6000,-1000,5000,dtime,
-                                                              8000,0,8000,hit.fEcal);
-            //if(nmult==1) 
-            //  Histogramer::fill(blob->GetName(),"gdtime1N",6000,-1000,5000,dtime,
-            //                                                  8000,0,8000,hit.fEcal);
-            //if(nmult==2) 
-            //  Histogramer::fill(blob->GetName(),"gdtime2N",6000,-1000,5000,dtime,
-            //                                                  8000,0,8000,hit.fEcal);
-            if(nmult>0) 
-              Histogramer::fill(blob->GetName(),"gdtimeAN",6000,-1000,5000,dtime,
-                                                              8000,0,8000,hit.fEcal);
 
-            //if(first) 
-            //   Histogramer::fill(blob->GetName(),"gdtime_0",6000,-1000,5000,dtime,
-            //                                                     8000,0,8000,hit.fEcal);
-
-          }
-
-          for(const auto &hit : fdsi.fClover.addbackHits) {
-            double gdt = fdsi.fLowGain1.dytime - hit.fTime;
-            Histogramer::fill(blob->GetName(),"atime",500,-2000,2000,fdsi.fLowGain1.dytime - hit.fTime,
-                1000,0,4000,hit.fEcal);
-            if(gdt<200. || gdt>500.) continue; 
-
-            Histogramer::fill(blob->GetName(),"asummary",16000,0,8000,hit.fEcal,
-                20,0,20,hit.fId);
-
-            if( (dtime>0 && dtime<100) || (dtime>900 && dtime<1000) ) { 
-              for(const auto &hit1 : fdsi.fClover.addbackHits) {
-                if(&hit == &hit1) continue;
-                if(std::abs(hit.fTime - hit1.fTime)>200) continue; // 100 is made up atm
-                if(dtime>0 && dtime<100) 
-                  Histogramer::fill(blob->GetName(),"aa_0_100",8000,0,8000,hit.fEcal,
-                                                               8000,0,8000,hit1.fEcal);
-                if(dtime>900 && dtime<1000) 
-                  Histogramer::fill(blob->GetName(),"aa_900_1000",8000,0,8000,hit.fEcal,
-                                                                  8000,0,8000,hit1.fEcal);
-              }
+            if(dtime > 0.0 && dtime < 250.0) {
+              Histogramer::fill(gateName, "gg_0_250",
+                                8000, 0, 8000, hit.fEcal,
+                                8000, 0, 8000, hit1.fEcal);
+              if(first)
+              Histogramer::fill(gateName, "gg_0_250_first",
+                                8000, 0, 8000, hit.fEcal,
+                                8000, 0, 8000, hit1.fEcal);
             }
-            Histogramer::fill(blob->GetName(),"adtime",6000,-1000,5000,dtime,
-                                                              8000,0,8000,hit.fEcal);
-            //if(nmult==1) 
-            //  Histogramer::fill(blob->GetName(),"adtime1N",6000,-1000,5000,dtime,
-            //                                                  8000,0,8000,hit.fEcal);
-            //if(nmult==2) 
-            //  Histogramer::fill(blob->GetName(),"adtime2N",6000,-1000,5000,dtime,
-            //                                                  8000,0,8000,hit.fEcal);
-            if(nmult>0) 
-              Histogramer::fill(blob->GetName(),"adtimeAN",6000,-1000,5000,dtime,
-                                                              8000,0,8000,hit.fEcal);
 
-            //if(first) 
-            //   Histogramer::fill(blob->GetName(),"adtime_0",6000,-1000,5000,dtime,
-            //                                                     8000,0,8000,hit.fEcal);
-
+            if(dtime > 2000.0 && dtime < 2500.0) {
+              Histogramer::fill(gateName, "gg_2000_2500",
+                                8000, 0, 8000, hit.fEcal,
+                                8000, 0, 8000, hit1.fEcal);
+              if(first)
+              Histogramer::fill(gateName, "gg_2000_2500",
+                                8000, 0, 8000, hit.fEcal,
+                                8000, 0, 8000, hit1.fEcal);
+            }
           }
-
-
-
-
-          first=false;
         }
       }
+
+      for(const auto& hit : fdsi.fClover.addbackHits) {
+        const double gdt = fdsi.fLowGain1.dytime - hit.fTime;
+
+        if(gdt < 200.0 || gdt > 500.0)
+          continue;
+
+        Histogramer::fill(gateName, "adtime",
+                          6000, -1000, 5000, dtime,
+                          8000, 0, 8000, hit.fEcal);
+        if(first)
+        Histogramer::fill(gateName, "adtime_first",
+                          6000, -1000, 5000, dtime,
+                          8000, 0, 8000, hit.fEcal);
+
+        if(nmult > 0) {
+          Histogramer::fill(gateName, "adtimeAN",
+                            6000, -1000, 5000, dtime,
+                            8000, 0, 8000, hit.fEcal);
+          Histogramer::fill(gateName, "adtimeAN_first",
+                            6000, -1000, 5000, dtime,
+                            8000, 0, 8000, hit.fEcal);
+        }
+
+        if((dtime > 0.0 && dtime < 250.0) ||
+           (dtime > 2000.0 && dtime < 2500.0)) {
+          for(const auto& hit1 : fdsi.fClover.addbackHits) {
+            if(&hit == &hit1)
+              continue;
+
+            if(std::abs(hit.fTime - hit1.fTime) > 200.0)
+              continue;
+
+            if(dtime > 0.0 && dtime < 250.0) {
+              Histogramer::fill(gateName, "aa_0_250",
+                                8000, 0, 8000, hit.fEcal,
+                                8000, 0, 8000, hit1.fEcal);
+              if(first)
+              Histogramer::fill(gateName, "aa_0_250",
+                                8000, 0, 8000, hit.fEcal,
+                                8000, 0, 8000, hit1.fEcal);
+            }
+
+            if(dtime > 2000.0 && dtime < 2500.0) {
+              Histogramer::fill(gateName, "aa_2000_2500",
+                                8000, 0, 8000, hit.fEcal,
+                                8000, 0, 8000, hit1.fEcal);
+              if(first)
+              Histogramer::fill(gateName, "aa_2000_2500",
+                                8000, 0, 8000, hit.fEcal,
+                                8000, 0, 8000, hit1.fEcal);
+            }
+          }
+        }
+      }
+      first = false;
     }
-
   }
-
 }
 
 
