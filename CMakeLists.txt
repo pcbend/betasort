@@ -9,6 +9,9 @@ project(groot
         HOMEPAGE_URL ""
         LANGUAGES CXX)
 
+
+set(CMAKE_BUILD_TYPE Release)
+
 #check for various ROOT libraries
 find_package(ROOT REQUIRED COMPONENTS RIO Tree) 
 
