@@ -153,9 +153,9 @@ void Histogramer::fill(std::string dname,std::string hname,
   TH1 *hist = (TH1*)clist->FindObject(hname.c_str());
   if(!hist) {
     if(ybins>0) 
-      hist = new TH2D(hname.c_str(),hname.c_str(),xbins,xlow,xhigh,ybins,ylow,yhigh);
+      hist = new TH2F(hname.c_str(),hname.c_str(),xbins,xlow,xhigh,ybins,ylow,yhigh);
     else 
-      hist = new TH1D(hname.c_str(),hname.c_str(),xbins,xlow,xhigh);
+      hist = new TH1F(hname.c_str(),hname.c_str(),xbins,xlow,xhigh);
 
     //printf("creating histogram:  %s  %s\n",  
     clist->Add(hist);
