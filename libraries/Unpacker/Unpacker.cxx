@@ -389,7 +389,7 @@ void Unpacker::Unpack() {
     fdsi.fPID.timestamp = fdsi.nPin1.Time();
 
     fdsi.fClover.BuildAddback();
-    FillHistograms(fdsi);
+    FillHistograms(fdsi);  //-> this is looking at ddashits before making them into FDSi. 
 
     if(fForwardToNext)  
       push(std::move(fdsi));
@@ -443,10 +443,9 @@ void Unpacker::FillHistograms(const TFDSi &fdsi) {
         }
         Histogramer::fill(dname,"ggTime",400,-1000,1000,dt,
                                              1000,0,4000,e);
-        Histogramer::fill(dname,"gg",8000,0,4000,hit.fEcal,
-                                     8000,0,4000,hit2.fEcal);
-        Histogramer::fill(dname,"gg",8000,0,4000,hit2.fEcal,
-                                     8000,0,4000,hit.fEcal);
+        if(dt>-200 &&  dt<50)
+        Histogramer::fill(dname,"gg",4000,0,2000,hit.fEcal,
+                                     4000,0,2000,hit2.fEcal);
       }
     }
 
@@ -458,10 +457,21 @@ void Unpacker::FillHistograms(const TFDSi &fdsi) {
         
       for(const auto &ab2 : fdsi.fClover.addbackHits) {
         if(&ab == &ab2) continue;
-        Histogramer::fill(dname,"aa",8000,0,4000,ab.fEcal,
-                                     8000,0,4000,ab2.fEcal);
-        Histogramer::fill(dname,"aa",8000,0,4000,ab2.fEcal,
-                                     8000,0,4000,ab.fEcal);
+        double e,dt; //, cdt;
+        if(ab.fEcal > ab2.fEcal) {
+          e   = ab2.fEcal;
+          dt  = ab.fTime - ab2.fTime;
+          //cdt = hit.fCfdTime - hit2.fCfdTime;
+        } else {
+          e   = ab.fEcal;
+          dt  = ab2.fTime - ab.fTime;
+          //cdt = hit2.fCfdTime - hit.fCfdTime;
+        }
+        Histogramer::fill(dname,"aaTime",400,-1000,1000,dt,
+                                             1000,0,4000,e);
+        if(dt>-200 &&  dt<50)
+        Histogramer::fill(dname,"aa",4000,0,2000,ab.fEcal,
+                                     4000,0,2000,ab2.fEcal);
       }
 
     }
