@@ -186,9 +186,9 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
        neutron->IsInside(hit.fTimeLeft - fdsi.fLowGain1.dytime,
                          hit.GetQDC())) {
       nmult++;
-      Histogramer::fill("vandleSummary_qdc",500,0,500,hit.fId,4096,0,64000,hit.GetQDC());
-      Histogramer::fill("vandleSummary_left",500,0,500,hit.fId, 4096,-32000,32000,hit.fTimeLeft - fdsi.fLowGain1.dytime);
-      Histogramer::fill("vandleSummary_right",500,0,500,hit.fId,4096,-32000,32000,hit.fTimeRight - fdsi.fLowGain1.dytime);
+      Histogramer::fill("vandleSummary_qdc",100,0,100,hit.fId,8192,0,8192,hit.GetQDC());
+      Histogramer::fill("vandleSummary_left",100,0,100,hit.fId, 1000,0,1000,hit.fTimeLeft - fdsi.fLowGain1.dytime);
+      Histogramer::fill("vandleSummary_right",100,0,100,hit.fId,1000,0,1000,hit.fTimeRight - fdsi.fLowGain1.dytime);
 
     }
   }
