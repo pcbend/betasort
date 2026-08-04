@@ -186,6 +186,10 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
        neutron->IsInside(hit.fTimeLeft - fdsi.fLowGain1.dytime,
                          hit.GetQDC())) {
       nmult++;
+      Histogramer::fill("vandleSummary_qdc",500,0,500,hit.fId,4096,0,64000,hit.GetQDC());
+      Histogramer::fill("vandleSummary_left",500,0,500,hit.fId, 4096,-32000,32000,hit.fTimeLeft - fdsi.fLowGain1.dytime);
+      Histogramer::fill("vandleSummary_right",500,0,500,hit.fId,4096,-32000,32000,hit.fTimeRight - fdsi.fLowGain1.dytime);
+
     }
   }
   Histogramer::fill("nmult", 100, 0, 100, nmult);
@@ -267,16 +271,16 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
      * Each candidate implant has a different decay time, so retain every
      * acceptable implant-decay pair here.
      */
-    bool first = true;
+    //bool first = true;
     for(const TImplant* implant : matchingImplants) {
       const double dtime =
           fdsi.fClock.initial / 1.e6 - implant->mtime();
 
       Histogramer::fill(gateName, "dtimeOnly",
                         2000, -1000, 5000, dtime);
-      if(first) 
-        Histogramer::fill(gateName, "dtimeOnlyi_first",
-                                     2000, -1000, 5000, dtime);
+      //if(first) 
+      //  Histogramer::fill(gateName, "dtimeOnlyi_first",
+      //                               2000, -1000, 5000, dtime);
 
 
       for(const auto& hit : fdsi.fClover.hits) {
@@ -288,19 +292,19 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
         Histogramer::fill(gateName, "gdtime",
                           6000, -1000, 5000, dtime,
                           8000, 0, 8000, hit.fEcal);
-        if(first)
-          Histogramer::fill(gateName, "gdtime_first",
-                                      6000, -1000, 5000, dtime,
-                                      8000, 0, 8000, hit.fEcal);
+        //if(first)
+        //  Histogramer::fill(gateName, "gdtime_first",
+        //                              6000, -1000, 5000, dtime,
+        //                              8000, 0, 8000, hit.fEcal);
 
         if(nmult > 0) {
           Histogramer::fill(gateName, "gdtimeAN",
                             6000, -1000, 5000, dtime,
                             8000, 0, 8000, hit.fEcal);
-          if(first)
-          Histogramer::fill(gateName, "gdtimeAN_first",
-                                        6000, -1000, 5000, dtime,
-                                        8000, 0, 8000, hit.fEcal);
+          //if(first)
+          //Histogramer::fill(gateName, "gdtimeAN_first",
+          //                              6000, -1000, 5000, dtime,
+          //                              8000, 0, 8000, hit.fEcal);
         }
 
         if((dtime > 0.0 && dtime < 250.0) ||
@@ -319,20 +323,20 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
               Histogramer::fill(gateName, "gg_0_250",
                                 8000, 0, 8000, hit.fEcal,
                                 8000, 0, 8000, hit1.fEcal);
-              if(first)
-              Histogramer::fill(gateName, "gg_0_250_first",
-                                8000, 0, 8000, hit.fEcal,
-                                8000, 0, 8000, hit1.fEcal);
+              //if(first)
+              //Histogramer::fill(gateName, "gg_0_250_first",
+              //                  8000, 0, 8000, hit.fEcal,
+              //                  8000, 0, 8000, hit1.fEcal);
             }
 
             if(dtime > 2000.0 && dtime < 2500.0) {
               Histogramer::fill(gateName, "gg_2000_2500",
                                 8000, 0, 8000, hit.fEcal,
                                 8000, 0, 8000, hit1.fEcal);
-              if(first)
-              Histogramer::fill(gateName, "gg_2000_2500",
-                                8000, 0, 8000, hit.fEcal,
-                                8000, 0, 8000, hit1.fEcal);
+              //if(first)
+              //Histogramer::fill(gateName, "gg_2000_2500",
+              //                  8000, 0, 8000, hit.fEcal,
+              //                  8000, 0, 8000, hit1.fEcal);
             }
           }
         }
@@ -347,18 +351,18 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
         Histogramer::fill(gateName, "adtime",
                           6000, -1000, 5000, dtime,
                           8000, 0, 8000, hit.fEcal);
-        if(first)
-        Histogramer::fill(gateName, "adtime_first",
-                          6000, -1000, 5000, dtime,
-                          8000, 0, 8000, hit.fEcal);
+        //if(first)
+        //Histogramer::fill(gateName, "adtime_first",
+        //                  6000, -1000, 5000, dtime,
+        //                  8000, 0, 8000, hit.fEcal);
 
         if(nmult > 0) {
           Histogramer::fill(gateName, "adtimeAN",
                             6000, -1000, 5000, dtime,
                             8000, 0, 8000, hit.fEcal);
-          Histogramer::fill(gateName, "adtimeAN_first",
-                            6000, -1000, 5000, dtime,
-                            8000, 0, 8000, hit.fEcal);
+          //Histogramer::fill(gateName, "adtimeAN_first",
+          //                  6000, -1000, 5000, dtime,
+          //`                  8000, 0, 8000, hit.fEcal);
         }
 
         if((dtime > 0.0 && dtime < 250.0) ||
@@ -374,25 +378,25 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
               Histogramer::fill(gateName, "aa_0_250",
                                 8000, 0, 8000, hit.fEcal,
                                 8000, 0, 8000, hit1.fEcal);
-              if(first)
-              Histogramer::fill(gateName, "aa_0_250",
-                                8000, 0, 8000, hit.fEcal,
-                                8000, 0, 8000, hit1.fEcal);
+              //if(first)
+              //Histogramer::fill(gateName, "aa_0_250",
+              //                  8000, 0, 8000, hit.fEcal,
+              //                  8000, 0, 8000, hit1.fEcal);
             }
 
-            if(dtime > 2000.0 && dtime < 2500.0) {
+            if(dtime > 2000.0 && dtime < 2250.0) {
               Histogramer::fill(gateName, "aa_2000_2500",
                                 8000, 0, 8000, hit.fEcal,
                                 8000, 0, 8000, hit1.fEcal);
-              if(first)
-              Histogramer::fill(gateName, "aa_2000_2500",
-                                8000, 0, 8000, hit.fEcal,
-                                8000, 0, 8000, hit1.fEcal);
+              //if(first)
+              //Histogramer::fill(gateName, "aa_2000_2500",
+              //                  8000, 0, 8000, hit.fEcal,
+              //                  8000, 0, 8000, hit1.fEcal);
             }
           }
         }
       }
-      first = false;
+      //first = false;
     }
   }
 }
