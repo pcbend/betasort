@@ -159,13 +159,13 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
   if(fdsi.fEventType != 12) // not a decay
     return;
 
-  Histogramer::fill("decayX",
-                    2000, 0, 48, fdsi.fLowGain1.xpos,
-                    4000, 0, 64000, fdsi.fLowGain1.dyenergy);
+  //Histogramer::fill("decayX",
+  //                  2000, 0, 48, fdsi.fLowGain1.xpos,
+  //                  4000, 0, 64000, fdsi.fLowGain1.dyenergy);
 
-  Histogramer::fill("decayY",
-                    2000, 0, 48, fdsi.fLowGain1.ypos,
-                    4000, 0, 64000, fdsi.fLowGain1.dyenergy);
+  //Histogramer::fill("decayY",
+  //                  2000, 0, 48, fdsi.fLowGain1.ypos,
+  //                  4000, 0, 64000, fdsi.fLowGain1.dyenergy);
 
   // Ungated decay-event gamma-ray spectra. These are filled once per decay.
   for(const auto& hit : fdsi.fClover.hits) {
@@ -181,15 +181,16 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
   }
 
   int nmult = 0;
+  std::vector<double> ntimes;
   for(const auto& hit : fdsi.fVandle.fHits) {
     if(neutron &&
        neutron->IsInside(hit.fTimeLeft - fdsi.fLowGain1.dytime,
                          hit.GetQDC())) {
       nmult++;
       Histogramer::fill("vandleSummary_qdc",100,0,100,hit.fId,8192,0,8192,hit.GetQDC());
-      Histogramer::fill("vandleSummary_left",100,0,100,hit.fId, 1000,0,1000,hit.fTimeLeft - fdsi.fLowGain1.dytime);
-      Histogramer::fill("vandleSummary_right",100,0,100,hit.fId,1000,0,1000,hit.fTimeRight - fdsi.fLowGain1.dytime);
-
+      Histogramer::fill("vandleSummary_left",100,0,100,hit.fId, 256,0,2048,hit.fTimeLeft - fdsi.fLowGain1.dytime);
+      Histogramer::fill("vandleSummary_right",100,0,100,hit.fId,256,0,2048,hit.fTimeRight - fdsi.fLowGain1.dytime);
+      ntimes.push_back(hit.fTimeLeft - fdsi.fLowGain1.dytime);
     }
   }
   Histogramer::fill("nmult", 100, 0, 100, nmult);
@@ -245,6 +246,17 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
       Histogramer::fill(gateName, "gsummary",
                         16000, 0, 8000, hit.fEcal,
                         70, 0, 70, hit.fId);
+      
+      for(const auto& hit2 : fdsi.fClover.hits) {
+        if(&hit == &hit2) continue;
+        Histogramer::fill(gateName,"gg_total",8000, 0, 8000, hit.fEcal,
+                                              8000, 0, 8000, hit2.fEcal);
+      }
+
+      for(const auto& ntime : ntimes) {
+        Histogramer::fill(gateName,"gn",16000,0,8000,hit.fEcal,
+                                        256,0,2024,ntime);
+      }
     }
 
     /*
@@ -264,6 +276,16 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
       Histogramer::fill(gateName, "asummary",
                         16000, 0, 8000, hit.fEcal,
                         20, 0, 20, hit.fId);
+
+      for(const auto& hit2 : fdsi.fClover.addbackHits) {
+        if(&hit == &hit2) continue;
+        Histogramer::fill(gateName,"aa_total",8000, 0, 8000, hit.fEcal,
+                                              8000, 0, 8000, hit2.fEcal);
+      }
+      for(const auto& ntime : ntimes) {
+        Histogramer::fill(gateName,"an",16000,0,8000,hit.fEcal,
+                                        256,0,2024,ntime);
+      }
     }
 
     /*
@@ -385,7 +407,7 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
             }
 
             if(dtime > 2000.0 && dtime < 2250.0) {
-              Histogramer::fill(gateName, "aa_2000_2500",
+              Histogramer::fill(gateName, "aa_2000_2250",
                                 8000, 0, 8000, hit.fEcal,
                                 8000, 0, 8000, hit1.fEcal);
               //if(first)
