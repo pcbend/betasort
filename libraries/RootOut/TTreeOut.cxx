@@ -338,7 +338,7 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
           }
         } else if(dtime > 2000.0 && dtime < 2250.0) {
           for(const auto& ntime : ntimes) {
-            Histogramer::fill(gateName,"gn_250_2250",8000,0,8000,hit.fEcal,
+            Histogramer::fill(gateName,"gn_2000_2250",8000,0,8000,hit.fEcal,
                                                      128,0,1024,ntime); 
           }
           for(const auto& hit1 : fdsi.fClover.hits) {
@@ -348,7 +348,7 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
             if(!Histogramer::Get()->GetGammaPrompt()->IsInside(gdt1,hit1.fEcal)) 
               continue;
 
-            Histogramer::fill(gateName, "gg_250_2250",
+            Histogramer::fill(gateName, "gg_2000_2250",
                 8000, 0, 8000, hit.fEcal,
                 8000, 0, 8000, hit1.fEcal);
           }
@@ -390,7 +390,7 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
           }
         } else if(dtime > 2000.0 && dtime < 2250.0) {
           for(const auto& ntime : ntimes) {
-            Histogramer::fill(gateName,"aa_250_2250",8000,0,8000,hit.fEcal,
+            Histogramer::fill(gateName,"an_2000_2250",8000,0,8000,hit.fEcal,
                                                      128,0,1024,ntime); 
           }
           for(const auto& hit1 : fdsi.fClover.addbackHits) {
@@ -400,7 +400,7 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
             if(!Histogramer::Get()->GetGammaPrompt()->IsInside(gdt1,hit1.fEcal)) 
               continue;
 
-            Histogramer::fill(gateName, "aa_250_2250",
+            Histogramer::fill(gateName, "aa_2000_2250",
                 8000, 0, 8000, hit.fEcal,
                 8000, 0, 8000, hit1.fEcal);
           }
