@@ -303,7 +303,7 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
       //  Histogramer::fill(gateName, "dtimeOnlyi_first",
       //                               2000, -1000, 5000, dtime);
 
-
+/*
       for(const auto& hit : fdsi.fClover.hits) {
         const double gdt = fdsi.fLowGain1.dytime - hit.fTime;
 
@@ -355,7 +355,7 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
 
         }
       }
-
+*/
       for(const auto& hit : fdsi.fClover.addbackHits) {
         const double gdt = fdsi.fLowGain1.dytime - hit.fTime;
 
@@ -371,6 +371,64 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
               6000, -1000, 5000, dtime,
               8000, 0, 8000, hit.fEcal);
         }
+
+
+        if(dtime >=0.0 && dtime <= 25.0) {   
+          for(const auto& hit1 : fdsi.fClover.addbackHits) {
+            if(&hit == &hit1)
+              continue;
+            const double gdt1 = fdsi.fLowGain1.dytime - hit1.fTime;
+            if(!Histogramer::Get()->GetGammaPrompt()->IsInside(gdt1,hit1.fEcal)) 
+              continue;
+            Histogramer::fill(gateName, "aa_0_25",
+                8000, 0, 8000, hit.fEcal,
+                8000, 0, 8000, hit1.fEcal);
+            if(nmult > 0) {
+              Histogramer::fill(gateName, "aan_0_25",
+                                           8000, 0, 8000, hit.fEcal,
+                                           8000, 0, 8000, hit1.fEcal);
+            }
+          }
+        }
+
+        if(dtime >=0.0 && dtime <= 50.0) {   
+          for(const auto& hit1 : fdsi.fClover.addbackHits) {
+            if(&hit == &hit1)
+              continue;
+            const double gdt1 = fdsi.fLowGain1.dytime - hit1.fTime;
+            if(!Histogramer::Get()->GetGammaPrompt()->IsInside(gdt1,hit1.fEcal)) 
+              continue;
+            Histogramer::fill(gateName, "aa_0_50",
+                8000, 0, 8000, hit.fEcal,
+                8000, 0, 8000, hit1.fEcal);
+            if(nmult > 0) {
+              Histogramer::fill(gateName, "aan_0_50",
+                                           8000, 0, 8000, hit.fEcal,
+                                           8000, 0, 8000, hit1.fEcal);
+            }
+          }
+
+        }
+
+        if(dtime >=0.0 && dtime <= 500.0) {   
+          for(const auto& hit1 : fdsi.fClover.addbackHits) {
+            if(&hit == &hit1)
+              continue;
+            const double gdt1 = fdsi.fLowGain1.dytime - hit1.fTime;
+            if(!Histogramer::Get()->GetGammaPrompt()->IsInside(gdt1,hit1.fEcal)) 
+              continue;
+            Histogramer::fill(gateName, "aa_0_500",
+                8000, 0, 8000, hit.fEcal,
+                8000, 0, 8000, hit1.fEcal);
+            if(nmult > 0) {
+              Histogramer::fill(gateName, "aan_0_500",
+                                           8000, 0, 8000, hit.fEcal,
+                                           8000, 0, 8000, hit1.fEcal);
+            }
+          }
+
+        }
+
 
         if(dtime >0.0 && dtime < 250.0) {   
           for(const auto& ntime : ntimes) {
@@ -388,7 +446,9 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
                 8000, 0, 8000, hit.fEcal,
                 8000, 0, 8000, hit1.fEcal);
           }
-        } else if(dtime > 2000.0 && dtime < 2250.0) {
+        } 
+        /*
+        else if(dtime > 2000.0 && dtime < 2250.0) {
           for(const auto& ntime : ntimes) {
             Histogramer::fill(gateName,"an_2000_2250",8000,0,8000,hit.fEcal,
                                                      128,0,1024,ntime); 
@@ -406,6 +466,7 @@ void TTreeOut::MakeHistograms(TFDSi& fdsi,
           }
 
         }
+        */
       }
 
     }
